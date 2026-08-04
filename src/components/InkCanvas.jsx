@@ -1,6 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
 import { TOOLS, drawStroke, pointerToSample, smoothedSamples } from '../domain/ink.js'
 import { UndoManager } from '../domain/undo.js'
+
 const InkCanvas = forwardRef(function InkCanvas({
   strokes,
   onStrokesChange,
@@ -12,6 +13,7 @@ const InkCanvas = forwardRef(function InkCanvas({
   pageId = null,
   section = 'free',
   placeholderChar = '',
+  undoManager = null,
   onFocus,
   onDoubleTap,
   disabled = false,
@@ -21,9 +23,10 @@ const InkCanvas = forwardRef(function InkCanvas({
   const activeRef = useRef(null)     // tratto in corso
   const drawingRef = useRef(false)
   const currentStrokeRef = useRef(null)
-  const undoRef = useRef(new UndoManager(50))
+  const undoRef = useRef(undoManager ?? new UndoManager(50))
   const strokesRef = useRef(strokes)
   const lastTinyTapRef = useRef(null)
+  const firstTapTimerRef = useRef(null)
 
   strokesRef.current = strokes
 
@@ -67,6 +70,10 @@ const InkCanvas = forwardRef(function InkCanvas({
     redrawLayer()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [strokes])
+
+  useEffect(() => () => {
+    clearTimeout(firstTapTimerRef.current)
+  }, [])
 
   function activeCtx() {
     return activeRef.current.getContext('2d')
@@ -133,7 +140,7 @@ const InkCanvas = forwardRef(function InkCanvas({
   function commit(next) {
     // baseline: primo stato registrato = situazione prima della prima modifica
     if (undoRef.current.states.length === 0) {
-      undoRef.current.push(strokesRef.current)
+      undoRef.current.push([...strokesRef.current])
     }
     undoRef.current.push(next)
     onStrokesChange(next)
@@ -146,7 +153,9 @@ const InkCanvas = forwardRef(function InkCanvas({
       minX = Math.min(minX, point.x); minY = Math.min(minY, point.y)
       maxX = Math.max(maxX, point.x); maxY = Math.max(maxY, point.y)
     }
-    return (maxX - minX) <= 16 && (maxY - minY) <= 16
+    // Soglia in pixel fisici: coerente a ogni zoom (BUG-22).
+    const threshold = 16 * zoom
+    return (maxX - minX) <= threshold && (maxY - minY) <= threshold
   }
 
   function endStroke(event) {
@@ -159,26 +168,31 @@ const InkCanvas = forwardRef(function InkCanvas({
     const final = { ...stroke, samples: smoothedSamples(stroke.samples) }
 
     // Doppio tap della penna (due tocchetti rapidi e minuscoli) → cambia strumento,
-    // anche quando si è già in modalità gomma.
+    // anche quando si è già in modalità gomma. Il primo tocchetto NON viene
+    // committato subito: aspetta la finestra del doppio tap (BUG-3, niente puntini orfani).
     if (stroke.pointerType === 'pen' && isTinyStroke(final)) {
       const now = Date.now()
       const previous = lastTinyTapRef.current
       if (previous && now - previous.time <= 450) {
         lastTinyTapRef.current = null
-        if (tool !== TOOLS.ERASER) {
-          const remaining = strokesRef.current.filter(
-            (existing) => existing.id !== previous.id && existing.id !== final.id,
-          )
-          if (remaining.length !== strokesRef.current.length) commit(remaining)
-        }
+        clearTimeout(firstTapTimerRef.current)
         onDoubleTap?.(final)
         clearActive()
         return
       }
       lastTinyTapRef.current = { id: final.id, time: now }
-    } else {
-      lastTinyTapRef.current = null
+      clearTimeout(firstTapTimerRef.current)
+      firstTapTimerRef.current = setTimeout(() => {
+        if (lastTinyTapRef.current?.id === final.id) {
+          lastTinyTapRef.current = null
+          commit([...strokesRef.current, final])
+        }
+      }, 450)
+      clearActive()
+      return
     }
+    lastTinyTapRef.current = null
+    clearTimeout(firstTapTimerRef.current)
 
     if (tool === TOOLS.ERASER) {
       const remaining = strokesRef.current.filter((existing) => !intersects(existing, final))

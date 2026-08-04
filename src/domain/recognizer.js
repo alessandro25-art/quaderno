@@ -51,9 +51,13 @@ export class CloudOCRRecognizer {
         imageContext: { languageHints: [lang === 'it' ? 'it' : 'en'] },
       }],
     }
-    const response = await fetch(`${this.endpoint}?key=${encodeURIComponent(this.apiKey)}`, {
+    // La chiave va nell'header X-Goog-Api-Key, mai nell'URL (resterebbe nei log).
+    const response = await fetch(this.endpoint, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': this.apiKey,
+      },
       body: JSON.stringify(body),
     })
     if (!response.ok) throw new Error(`OCR fallito (${response.status})`)

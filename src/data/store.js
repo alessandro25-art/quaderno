@@ -113,6 +113,8 @@ export function createJournalStore(dbName = 'quaderno') {
   }
 
   async function exportData() {
+    // La API key NON esce nei backup: resta solo sul dispositivo.
+    const settings = (await db.settings.toArray()).filter((row) => row.key !== 'apiKey')
     return {
       schemaVersion: SCHEMA_VERSION,
       exportedAt: new Date().toISOString(),
@@ -121,7 +123,7 @@ export function createJournalStore(dbName = 'quaderno') {
       strokes: await db.strokes.toArray(),
       questions: await db.questions.toArray(),
       tags: await db.tags.toArray(),
-      settings: await db.settings.toArray(),
+      settings,
     }
   }
 
@@ -129,6 +131,8 @@ export function createJournalStore(dbName = 'quaderno') {
     if (!backup || backup.schemaVersion !== SCHEMA_VERSION) {
       throw new Error(`Backup non compatibile (schema ${backup?.schemaVersion ?? 'assente'})`)
     }
+    // Conserva la API key locale se il backup non la contiene.
+    const localApiKey = await db.settings.get('apiKey')
     await db.transaction('rw', db.notebooks, db.pages, db.strokes, db.questions, db.tags, db.settings, async () => {
       await Promise.all([
         db.notebooks.clear(),
@@ -144,6 +148,9 @@ export function createJournalStore(dbName = 'quaderno') {
       if (backup.questions?.length) await db.questions.bulkPut(backup.questions)
       if (backup.tags?.length) await db.tags.bulkPut(backup.tags)
       if (backup.settings?.length) await db.settings.bulkPut(backup.settings)
+      if (localApiKey && !backup.settings?.some((row) => row.key === 'apiKey')) {
+        await db.settings.put(localApiKey)
+      }
     })
     return true
   }

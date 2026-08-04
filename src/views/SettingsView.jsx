@@ -32,12 +32,16 @@ export default function SettingsView({ store, notebooks = [], onNotebooksChanged
     let active = true
     async function measure() {
       if (!navigator.storage?.estimate) return
-      const estimate = await navigator.storage.estimate()
-      if (!active) return
-      setStorageInfo({
-        usage: estimate.usage ?? 0,
-        quota: estimate.quota ?? 0,
-      })
+      try {
+        const estimate = await navigator.storage.estimate()
+        if (!active) return
+        setStorageInfo({
+          usage: estimate.usage ?? 0,
+          quota: estimate.quota ?? 0,
+        })
+      } catch {
+        setStorageInfo(null)
+      }
     }
     measure()
     return () => { active = false }

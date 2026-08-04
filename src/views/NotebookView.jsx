@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import InkCanvas from '../components/InkCanvas.jsx'
 import { TOOLS, INK_COLORS, PEN_WIDTHS } from '../domain/ink.js'
+import { UndoManager } from '../domain/undo.js'
 import { getDailyStructure } from '../data/questions.js'
 import { createRecognizer } from '../domain/recognizer.js'
 import { exportCanvasAsPdf } from '../domain/pdf.js'
@@ -49,6 +50,14 @@ export default function NotebookView({ store, notebook, initialDate = null, onBa
   const [recognizing, setRecognizing] = useState(false)
   const [sectionIndex, setSectionIndex] = useState(0)
   const canvasRefs = useRef({})
+  // Undo manager per sezione: sopravvivono al cambio di domanda (BUG-4).
+  const undoManagersRef = useRef({})
+  // Coda di persistenza serializzata: niente race tra scritture rapide (BUG-1).
+  const persistQueueRef = useRef(Promise.resolve())
+  // Specchio dello stato per la coda (sempre l'ultimo valore).
+  const sectionsRef = useRef({})
+  sectionsRef.current = strokesBySection
+  const midnightWarnedRef = useRef(false)
 
   const structure = getDailyStructure(date)
   const kindle = notebook.paperType === 'kindle'
@@ -89,22 +98,59 @@ export default function NotebookView({ store, notebook, initialDate = null, onBa
   useEffect(() => {
     let active = true
     async function load() {
-      const todayPage = await store.createPage({ notebookId: notebook.id, date, paperType: notebook.paperType })
-      if (!active) return
-      setPage(todayPage)
-      const stored = await store.listStrokes(todayPage.id)
-      if (!active) return
-      const grouped = {}
-      for (const stroke of stored) {
-        const key = stroke.section ?? 'free'
-        grouped[key] = grouped[key] || []
-        grouped[key].push(stroke)
+      try {
+        const todayPage = await store.createPage({ notebookId: notebook.id, date, paperType: notebook.paperType })
+        if (!active) return
+        setPage(todayPage)
+        const stored = await store.listStrokes(todayPage.id)
+        if (!active) return
+        const grouped = {}
+        for (const stroke of stored) {
+          const key = stroke.section ?? 'free'
+          grouped[key] = grouped[key] || []
+          grouped[key].push(stroke)
+        }
+        // Merge con i tratti già scritti in memoria durante il caricamento (BUG-5).
+        const merged = { ...grouped }
+        for (const [key, list] of Object.entries(sectionsRef.current)) {
+          if (!list?.length) continue
+          merged[key] = [...(merged[key] ?? []), ...list]
+        }
+        setStrokesBySection(merged)
+        // Svuota il buffer dei tratti scritti durante il caricamento.
+        if (Object.keys(merged).length > 0) {
+          const all = Object.values(merged).flat()
+          if (all.length > 0) {
+            persistQueueRef.current = persistQueueRef.current.then(() =>
+              store.db.transaction('rw', store.db.strokes, async () => {
+                await store.db.strokes.where('pageId').equals(todayPage.id).delete()
+                await store.saveStrokes(all)
+              }).catch(() => {}),
+            )
+          }
+        }
+      } catch (error) {
+        console.error('Impossibile caricare la pagina:', error)
+        if (active) setNotice('Impossibile caricare la pagina. Verifica lo spazio disponibile.')
       }
-      setStrokesBySection(grouped)
     }
     load()
     return () => { active = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [store, notebook.id, notebook.paperType, date])
+
+  // Scrittura oltre mezzanotte: avvisa una volta (BUG-8).
+  useEffect(() => {
+    midnightWarnedRef.current = false
+    const interval = setInterval(() => {
+      const today = format(new Date(), 'yyyy-MM-dd')
+      if (today !== date && !midnightWarnedRef.current) {
+        midnightWarnedRef.current = true
+        setNotice('È passata mezzanotte: se vuoi, vai su "Oggi" per la pagina nuova.')
+      }
+    }, 60000)
+    return () => clearInterval(interval)
+  }, [date])
 
   useEffect(() => {
     function onKeyDown(event) {
@@ -122,15 +168,24 @@ export default function NotebookView({ store, notebook, initialDate = null, onBa
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [activeSection])
 
-  const persistStrokes = useCallback(async (section, next) => {
+  const persistStrokes = useCallback((section, next) => {
     setStrokesBySection((previous) => ({ ...previous, [section]: next }))
     if (!page) return
-    const all = Object.values({ ...strokesBySection, [section]: next }).flat()
-    await store.db.transaction('rw', store.db.strokes, async () => {
-      await store.db.strokes.where('pageId').equals(page.id).delete()
-      await store.saveStrokes(all)
-    })
-  }, [store, page, strokesBySection])
+    // Scritture serializzate: ogni salvataggio parte dopo il precedente (BUG-1),
+    // e scrive l'ultimo stato completo al momento dell'esecuzione (niente race).
+    persistQueueRef.current = persistQueueRef.current
+      .then(async () => {
+        const all = Object.values({ ...sectionsRef.current, [section]: next }).flat()
+        await store.db.transaction('rw', store.db.strokes, async () => {
+          await store.db.strokes.where('pageId').equals(page.id).delete()
+          await store.saveStrokes(all)
+        })
+      })
+      .catch((error) => {
+        console.error('Salvataggio fallito:', error)
+        setNotice('Salvataggio fallito: spazio pieno? Esporta un backup per sicurezza.')
+      })
+  }, [store, page])
 
   async function setPageEnabled(enabled) {
     if (!page) return
@@ -242,6 +297,7 @@ export default function NotebookView({ store, notebook, initialDate = null, onBa
               pageId={page?.id}
               section={current.id}
               placeholderChar={current.text.trim().charAt(0)}
+              undoManager={undoManagersRef.current[current.id] ??= new UndoManager(50)}
               onFocus={setActiveSection}
               onDoubleTap={handlePenDoubleTap}
             />

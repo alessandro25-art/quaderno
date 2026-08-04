@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, addDays, parseISO } from 'date-fns'
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, parseISO, subYears } from 'date-fns'
 import { it } from 'date-fns/locale'
 import { ArrowLeft, ChevronLeft, ChevronRight, Settings, ScrollText } from 'lucide-react'
 import { techniqueForDate } from '../data/questions.js'
@@ -53,11 +53,12 @@ export default function ArchiveView({ store, notebook, onBack, onOpenDay, onOpen
 
   const firstWeekday = startOfMonth(month).getDay() // 0 = domenica
 
-  // «In questo giorno»: giorni del mese con una pagina esattamente un anno prima.
+  // «In questo giorno»: giorni del mese con una pagina esattamente un anno prima
+  // (subYears gestisce correttamente gli anni bisestili).
   const anniversaries = useMemo(() => {
     const found = []
     for (const day of days) {
-      const lastYear = format(addDays(day, -365), 'yyyy-MM-dd')
+      const lastYear = format(subYears(day, 1), 'yyyy-MM-dd')
       if (byDate[lastYear]) found.push({ today: format(day, 'yyyy-MM-dd'), lastYear })
     }
     return found

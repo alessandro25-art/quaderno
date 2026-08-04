@@ -77,6 +77,20 @@ describe('journal store', () => {
     expect(await store.getSetting('missing', 'fallback')).toBe('fallback')
   })
 
+  it('never exports the API key in backups and preserves it on import', async () => {
+    await store.setSetting('apiKey', 'chiave-segreta')
+    await store.setSetting('paperType', 'kindle')
+    const backup = await store.exportData()
+    expect(backup.settings.some((row) => row.key === 'apiKey')).toBe(false)
+    expect(backup.settings.some((row) => row.key === 'paperType')).toBe(true)
+
+    // Import di un backup senza chiave: quella locale resta.
+    const fresh = createJournalStore(`app-test-${crypto.randomUUID()}`)
+    await fresh.importData(backup)
+    expect(await fresh.getSetting('apiKey')).toBe('chiave-segreta')
+    expect(await fresh.getSetting('paperType')).toBe('kindle')
+  })
+
   it('deletes a notebook with its pages and strokes', async () => {
     await store.saveNotebook({ id: 'nb1', title: 'X', coverColor: '#8a6f4d', paperType: 'lined', createdAt: 'x', updatedAt: 'x' })
     const page = await store.createPage({ notebookId: 'nb1', date: '2026-08-08' })

@@ -46,6 +46,7 @@ export default function CoverView({ store, notebooks, onOpen, onChanged }) {
             <input
               aria-label="Titolo del quaderno"
               value={title}
+              maxLength={80}
               onChange={(event) => setTitle(event.target.value)}
               placeholder="es. Diario, Grazie, Anno 2026…"
               autoFocus
