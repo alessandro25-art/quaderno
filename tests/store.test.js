@@ -86,8 +86,9 @@ describe('journal store', () => {
 
     // Import di un backup senza chiave: quella locale resta.
     const fresh = createJournalStore(`app-test-${crypto.randomUUID()}`)
+    await fresh.setSetting('apiKey', 'chiave-locale')
     await fresh.importData(backup)
-    expect(await fresh.getSetting('apiKey')).toBe('chiave-segreta')
+    expect(await fresh.getSetting('apiKey')).toBe('chiave-locale')
     expect(await fresh.getSetting('paperType')).toBe('kindle')
   })
 

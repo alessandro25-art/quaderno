@@ -38,7 +38,9 @@ describe('recognizers', () => {
     expect(text).toBe('ciao mondo')
     const [url, init] = fetchMock.mock.calls[0]
     expect(url).toContain('vision.googleapis.com')
-    expect(url).toContain('test-key')
+    // La chiave viaggia nell'header, mai nell'URL.
+    expect(url).not.toContain('test-key')
+    expect(init.headers['X-Goog-Api-Key']).toBe('test-key')
     expect(init.body).toContain('DOCUMENT_TEXT_DETECTION')
   })
 
