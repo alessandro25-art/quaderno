@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="86" fill="#f4edda"/>
+  <rect x="40" y="40" width="432" height="432" rx="60" fill="none" stroke="#d8cba4" stroke-width="8"/>
+  <text x="256" y="250" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="330" font-weight="600" fill="#3a2f28">Q</text>
+  <line x1="136" y1="318" x2="376" y2="318" stroke="#3a2f28" stroke-width="14" stroke-linecap="round"/>
+  <line x1="176" y1="360" x2="336" y2="360" stroke="#8a6f4d" stroke-width="9" stroke-linecap="round"/>
+</svg>

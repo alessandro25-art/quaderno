@@ -1,0 +1,597 @@
+/* ── Quaderno: design system "pen and paper" ─────────────────────────────── */
+
+:root {
+  --paper: #faf3e0;
+  --paper-deep: #f3e9d0;
+  --paper-line: #e8dcc4;
+  --paper-shadow: #d4c5a9;
+  --ink: #2c2416;
+  --ink-soft: #6b5a45;
+  --ink-faint: #9c8a6e;
+  --surface: #f6efdc;
+  --surface-alt: #efe5cc;
+  --accent: #8a6f4d;
+  --accent-soft: #b8860b;
+  --error: #8b3a3a;
+  --success: #4a6741;
+  --line: rgba(44, 36, 22, 0.14);
+  --line-strong: rgba(44, 36, 22, 0.28);
+  color-scheme: light;
+  --serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --mono: 'Courier Prime', 'Courier New', monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(184, 134, 11, 0.05), transparent 55%),
+    var(--paper);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
+
+button { font-family: inherit; }
+input, select, textarea { font-family: inherit; color: inherit; }
+
+.app { max-width: 1240px; margin: 0 auto; padding: 14px; }
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 4px 18px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 20px;
+}
+
+.header-title { flex: 1; min-width: 0; }
+
+.header-title .kicker, .kicker {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.header-title h1 {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 30px;
+  line-height: 1.1;
+}
+
+.header-actions { display: flex; gap: 6px; }
+
+/* ── Bottoni ─────────────────────────────────────────────────────────────── */
+
+.ghost-button, .tool-button {
+  min-width: 48px;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink-soft);
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.ghost-button:hover, .tool-button:hover { border-color: var(--accent); color: var(--ink); }
+.ghost-button.active, .tool-button.active { border-color: var(--accent); background: var(--accent-soft); color: #fff; }
+.ghost-button.strong { border-color: var(--line-strong); color: var(--ink); }
+
+.primary-button {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 18px;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fdf8ec;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primary-button:hover { background: var(--accent-soft); }
+.primary-button:disabled { opacity: 0.5; cursor: default; }
+
+/* ── Copertina / quaderni ────────────────────────────────────────────────── */
+
+.notebook-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 22px;
+  padding: 18px 4px;
+}
+
+.notebook-card {
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.notebook-cover {
+  aspect-ratio: 3 / 4;
+  border-radius: 6px 14px 14px 6px;
+  display: flex;
+  align-items: flex-end;
+  padding: 14px;
+  box-shadow:
+    inset -10px 0 14px -10px rgba(0, 0, 0, 0.45),
+    0 6px 14px -8px rgba(44, 36, 22, 0.55);
+  transition: transform 0.18s ease-out, box-shadow 0.18s ease-out;
+}
+
+.notebook-card:hover .notebook-cover {
+  transform: translateY(-3px) rotate(-0.6deg);
+  box-shadow:
+    inset -10px 0 14px -10px rgba(0, 0, 0, 0.45),
+    0 12px 22px -10px rgba(44, 36, 22, 0.6);
+}
+
+.notebook-title {
+  color: #f6efdc;
+  font-family: var(--serif);
+  font-size: 21px;
+  font-weight: 600;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  overflow-wrap: anywhere;
+}
+
+.notebook-meta { color: var(--ink-faint); font-size: 11px; }
+
+.new-notebook {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 0 4px 22px;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 18px;
+  align-items: end;
+}
+
+.new-notebook label, .settings-card label {
+  display: grid;
+  gap: 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+}
+
+.new-notebook input, .settings-card input, .settings-card select {
+  min-height: 46px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: #fffdf6;
+  padding: 0 12px;
+  font-size: 14px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.new-notebook fieldset { border: 0; margin: 0; padding: 0; }
+.new-notebook legend { font-size: 11px; color: var(--ink-soft); margin-bottom: 6px; }
+
+.cover-colors { display: flex; gap: 8px; }
+
+.cover-color {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+}
+
+.cover-color.active { border-color: var(--accent-soft); }
+
+.empty-state {
+  margin: 60px auto;
+  max-width: 420px;
+  text-align: center;
+  color: var(--ink-soft);
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+}
+
+.empty-state svg { color: var(--accent); }
+.empty-state h2 { font-family: var(--serif); margin: 0; font-size: 26px; color: var(--ink); }
+.empty-state p { margin: 0; font-size: 13px; }
+
+/* ── Pagina quaderno ─────────────────────────────────────────────────────── */
+
+.notebook-view { display: flex; flex-direction: column; min-height: calc(100vh - 28px); }
+
+.page-shell {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  padding: 6px 10px 18px;
+}
+
+.spine {
+  width: 22px;
+  flex: 0 0 22px;
+  background:
+    repeating-linear-gradient(180deg, rgba(44, 36, 22, 0.06) 0 2px, transparent 2px 9px),
+    var(--paper-deep);
+  border-radius: 4px 0 0 4px;
+  box-shadow: inset -6px 0 8px -6px var(--paper-shadow);
+}
+
+.spine.right {
+  border-radius: 0 4px 4px 0;
+  box-shadow: inset 6px 0 8px -6px var(--paper-shadow);
+}
+
+.paper-page {
+  flex: 1;
+  max-width: 860px;
+  background: var(--paper);
+  border-radius: 0;
+  box-shadow:
+    -3px 0 8px -4px rgba(44, 36, 22, 0.35),
+    3px 0 8px -4px rgba(44, 36, 22, 0.35),
+    0 14px 30px -14px rgba(44, 36, 22, 0.5);
+  padding: 26px 34px 24px;
+  display: flex;
+  flex-direction: column;
+  min-height: 640px;
+  position: relative;
+}
+
+/* Texture carta */
+.paper-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.35;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+}
+
+.page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 14px;
+  position: relative;
+}
+
+.page-date {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 27px;
+  color: var(--ink);
+  transform: rotate(-0.4deg);
+}
+
+.page-notebook { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); }
+
+/* Bigliettino con la domanda */
+.question-ticket {
+  position: relative;
+  background: #fdf6dc;
+  border: 1px solid rgba(184, 134, 11, 0.35);
+  border-radius: 4px;
+  padding: 10px 16px 12px;
+  margin: 0 auto 14px;
+  max-width: 560px;
+  width: 100%;
+  transform: rotate(-0.5deg);
+  box-shadow: 0 4px 10px -6px rgba(44, 36, 22, 0.4);
+}
+
+.question-ticket::before {
+  content: '';
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  width: 26px;
+  height: 14px;
+  transform: translateX(-50%);
+  background: var(--accent);
+  opacity: 0.85;
+  clip-path: polygon(0 100%, 12% 0, 50% 55%, 88% 0, 100% 100%);
+}
+
+.ticket-label {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent-soft);
+  margin-bottom: 2px;
+}
+
+.question-ticket p { margin: 0; font-family: var(--serif); font-size: 19px; line-height: 1.35; }
+
+/* Canvas carta */
+.paper {
+  position: relative;
+  flex: 1;
+  min-height: 380px;
+  touch-action: none;
+  cursor: crosshair;
+  border-top: 1px solid var(--paper-line);
+  border-bottom: 1px solid var(--paper-line);
+}
+
+.ink-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+.paper-lined {
+  background: repeating-linear-gradient(
+    180deg, transparent 0 30px, var(--paper-line) 30px 31px
+  );
+}
+
+.paper-grid {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 31px, var(--paper-line) 31px 32px),
+    repeating-linear-gradient(90deg, transparent 0 31px, var(--paper-line) 31px 32px);
+}
+
+.paper-dotted {
+  background-image: radial-gradient(var(--paper-line) 1.1px, transparent 1.2px);
+  background-size: 32px 32px;
+}
+
+.paper-blank { background: var(--paper); }
+
+/* Footer stampato */
+.page-foot { margin-top: 20px; margin-bottom: 8px; display: grid; gap: 8px; position: relative; }
+
+.foot-line {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  border-bottom: 1px dotted var(--paper-line);
+  padding-bottom: 7px;
+}
+
+.foot-label {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent-soft);
+  flex: 0 0 auto;
+  font-weight: 700;
+}
+
+.foot-text { font-family: var(--serif); font-style: italic; font-size: 19px; color: var(--ink); }
+
+/* Toolbar pagina */
+.page-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 4px 4px;
+  flex-wrap: wrap;
+}
+
+.toolbar-group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+.toolbar-group .ghost-button, .toolbar-group .tool-button { min-height: 44px; min-width: 44px; padding: 0 10px; }
+
+.toolbar-separator { width: 1px; height: 26px; background: var(--line); margin: 0 4px; }
+
+.pen-dot { border-radius: 50%; background: var(--ink); display: inline-block; }
+
+.color-dot {
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.color-dot span { width: 22px; height: 22px; border-radius: 50%; display: block; }
+.color-dot.active { border-color: var(--accent-soft); }
+
+.zoom-value { font-size: 11px; color: var(--ink-faint); min-width: 44px; text-align: center; }
+
+/* Pannello OCR */
+.ocr-panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px;
+  margin-top: 12px;
+}
+
+.ocr-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 12px; }
+.ocr-head strong { font-family: var(--serif); font-size: 17px; }
+
+.ocr-panel textarea {
+  width: 100%;
+  min-height: 90px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: #fffdf6;
+  padding: 10px 12px;
+  font-size: 13px;
+  resize: vertical;
+}
+
+/* ── Archivio calendario ─────────────────────────────────────────────────── */
+
+.calendar-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 20px;
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+.calendar-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.calendar-head h2 { font-family: var(--serif); font-size: 24px; margin: 0; text-transform: capitalize; }
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  color: var(--ink-faint);
+  font-size: 11px;
+  margin-bottom: 6px;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendar-grid::before {
+  content: '';
+  grid-column: 1 / span calc(var(--offset, 0) == 0 ? 0 : var(--offset, 0));
+}
+
+.calendar-day {
+  min-height: 52px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 13px;
+  display: grid;
+  place-items: center;
+  position: relative;
+  cursor: default;
+}
+
+.calendar-day.has-page {
+  border-color: var(--line);
+  background: #fffdf6;
+  cursor: pointer;
+}
+
+.calendar-day.has-page:hover { border-color: var(--accent); }
+
+.calendar-day i {
+  position: absolute;
+  bottom: 7px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+}
+
+.calendar-day.today { box-shadow: inset 0 0 0 2px var(--accent-soft); }
+
+.calendar-note { margin-top: 16px; color: var(--ink-faint); font-size: 12px; text-align: center; }
+
+/* ── Impostazioni ────────────────────────────────────────────────────────── */
+
+.settings-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.settings-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px;
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.settings-card h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 19px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 10px;
+}
+
+.settings-card h2 svg { color: var(--accent); }
+
+.settings-help { margin: 0; font-size: 12px; color: var(--ink-soft); line-height: 1.6; }
+.settings-help.small { font-size: 11px; color: var(--ink-faint); }
+
+.settings-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* ── Notifiche e boot ────────────────────────────────────────────────────── */
+
+.notice-bar {
+  margin-top: 14px;
+  padding: 10px 14px;
+  border: 1px solid rgba(184, 134, 11, 0.4);
+  border-radius: 8px;
+  background: #fdf6dc;
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.boot-screen {
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  gap: 6px;
+}
+
+.boot-screen h1 { font-family: var(--serif); font-size: 44px; margin: 0; }
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+
+@media (max-width: 720px) {
+  .app { padding: 8px; }
+  .paper-page { padding: 20px 18px 20px; min-height: 540px; }
+  .spine { width: 14px; flex-basis: 14px; }
+  .page-toolbar { justify-content: center; }
+  .new-notebook { grid-template-columns: 1fr; }
+  .question-ticket p { font-size: 17px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
