@@ -17,6 +17,25 @@ const PEN_OPTIONS = [
   { id: 'thick', label: 'Grossa', width: PEN_WIDTHS.thick },
 ]
 
+const COLOR_LABELS = { black: 'Nero', blue: 'Blu', green: 'Verde', red: 'Rosso' }
+
+// Micro-copy anti-perfezionismo: una riga gentile sotto ogni domanda, a rotazione.
+const GENTLE_NOTES = [
+  'Scrivi una riga. Anche solo una parola. Va bene così.',
+  'Niente è troppo poco: una frase è già una pagina.',
+  'Non serve che sia bello. Serve che sia tuo.',
+  'Se oggi non hai voglia, va bene lo stesso: una riga per onorare il gesto.',
+  'La pagina non giudica. Scrivi come vieni.',
+  'Anche il silenzio di oggi è una risposta.',
+  'Una parola vera vale più di una pagina piena.',
+]
+
+function gentleNoteFor(dateValue) {
+  const epoch = Date.UTC(2026, 0, 1)
+  const day = Math.floor((Date.parse(`${dateValue}T00:00:00Z`) - epoch) / 86400000)
+  return GENTLE_NOTES[((day % GENTLE_NOTES.length) + GENTLE_NOTES.length) % GENTLE_NOTES.length]
+}
+
 const FULL_SECTION_HEIGHT = 'calc(100dvh - 350px)'
 
 export default function NotebookView({ store, notebook, initialDate = null, onBack, onOpenArchive, onOpenSettings }) {
@@ -38,6 +57,10 @@ export default function NotebookView({ store, notebook, initialDate = null, onBa
   const current = structure[sectionIndex] ?? structure[0]
   const isFirst = sectionIndex === 0
   const isLast = sectionIndex === structure.length - 1
+  // Pagine già scritte mantengono il loro foglio; pagine vuote seguono il foglio
+  // attuale del quaderno (così cambiarlo in Impostazioni si vede subito).
+  const hasInk = Object.values(strokesBySection).some((list) => list.length > 0)
+  const paperType = hasInk ? (page?.paperType ?? notebook.paperType) : notebook.paperType
 
   // Ogni nuovo giorno riparte dalla prima domanda.
   useEffect(() => {
@@ -204,6 +227,7 @@ export default function NotebookView({ store, notebook, initialDate = null, onBa
               <span className="section-theme">{current.theme}</span>
             </div>
             <p className="section-prompt">{current.text}</p>
+            <p className="gentle-note">{gentleNoteFor(date)}</p>
             <InkCanvas
               ref={(element) => { canvasRefs.current[current.id] = element }}
               strokes={strokesBySection[current.id] ?? []}
@@ -212,7 +236,7 @@ export default function NotebookView({ store, notebook, initialDate = null, onBa
               color={color}
               width={PEN_WIDTHS[penSize] ?? PEN_WIDTHS.medium}
               zoom={zoom}
-              paperType={page?.paperType ?? notebook.paperType}
+              paperType={paperType}
               pageId={page?.id}
               section={current.id}
               minHeight={FULL_SECTION_HEIGHT}
@@ -274,7 +298,7 @@ export default function NotebookView({ store, notebook, initialDate = null, onBa
                   key={name}
                   type="button"
                   className={`color-dot ${color === value ? 'active' : ''}`}
-                  aria-label={`Inchiostro ${name}`}
+                  aria-label={`Inchiostro ${COLOR_LABELS[name] ?? name}`}
                   aria-pressed={color === value}
                   onClick={() => setColor(value)}
                 >

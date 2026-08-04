@@ -13,6 +13,7 @@ export default function App({ store: providedStore } = {}) {
   const [view, setView] = useState(VIEWS.COVER)
   const [notebooks, setNotebooks] = useState([])
   const [currentId, setCurrentId] = useState(null)
+  const [settingsFrom, setSettingsFrom] = useState('notebook')
   const [jumpDate, setJumpDate] = useState(null)
   const [loading, setLoading] = useState(true)
   const [installable, setInstallable] = useState(false)
@@ -51,6 +52,13 @@ export default function App({ store: providedStore } = {}) {
     }
     window.addEventListener('beforeinstallprompt', capture)
     return () => window.removeEventListener('beforeinstallprompt', capture)
+  }, [])
+
+  // Storage persistente: chiede a Safari di non sfrattare i dati (ITP eviction).
+  useEffect(() => {
+    if (navigator.storage?.persist) {
+      navigator.storage.persist().catch(() => {})
+    }
   }, [])
 
   // Nuova versione disponibile: il service worker la segnala, l'utente aggiorna quando vuole.
@@ -100,7 +108,7 @@ export default function App({ store: providedStore } = {}) {
           initialDate={jumpDate}
           onBack={() => { refresh(); setView(VIEWS.COVER) }}
           onOpenArchive={() => setView(VIEWS.ARCHIVE)}
-          onOpenSettings={() => setView(VIEWS.SETTINGS)}
+          onOpenSettings={() => { setSettingsFrom('notebook'); setView(VIEWS.SETTINGS) }}
         />
       )}
       {view === VIEWS.ARCHIVE && current && (
@@ -108,6 +116,7 @@ export default function App({ store: providedStore } = {}) {
           store={store}
           notebook={current}
           onBack={() => setView(VIEWS.NOTEBOOK)}
+          onOpenSettings={() => { setSettingsFrom('archive'); setView(VIEWS.SETTINGS) }}
           onOpenDay={(date) => { setCurrentId(current.id); setJumpDate(date); setView(VIEWS.NOTEBOOK) }}
         />
       )}
@@ -116,7 +125,7 @@ export default function App({ store: providedStore } = {}) {
           store={store}
           notebooks={notebooks}
           onNotebooksChanged={refresh}
-          onBack={() => setView(current ? VIEWS.NOTEBOOK : VIEWS.COVER)}
+          onBack={() => setView(settingsFrom === 'archive' ? VIEWS.ARCHIVE : current ? VIEWS.NOTEBOOK : VIEWS.COVER)}
           onInstall={handleInstall}
           installable={installable}
           isStandalone={isStandalone}

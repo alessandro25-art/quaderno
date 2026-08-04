@@ -122,8 +122,11 @@ input, select, textarea { font-family: inherit; color: inherit; }
 .notebook-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-  gap: 22px;
-  padding: 18px 4px;
+  gap: 26px 22px;
+  padding: 22px 4px;
+  max-width: 880px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .notebook-card {
@@ -134,7 +137,7 @@ input, select, textarea { font-family: inherit; color: inherit; }
   text-align: left;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .notebook-cover {
@@ -383,8 +386,9 @@ input, select, textarea { font-family: inherit; color: inherit; }
 
 .section-progress > span:first-child {
   font-family: var(--mono);
-  font-size: 13px;
-  color: var(--ink-faint);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink-soft);
 }
 
 .section-progress-label {
@@ -409,7 +413,7 @@ input, select, textarea { font-family: inherit; color: inherit; }
 }
 
 .section-nav .ghost-button:disabled {
-  opacity: 0.35;
+  opacity: 0.5;
   cursor: default;
 }
 
@@ -428,6 +432,16 @@ input, select, textarea { font-family: inherit; color: inherit; }
   color: var(--ink);
   margin: 0 0 10px;
   line-height: 1.35;
+}
+
+.gentle-note {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14px;
+  color: #8b7e6a;
+  opacity: 0.75;
+  margin: 0 0 12px;
+  line-height: 1.4;
 }
 
 /* Canvas carta: touch-action none → la penna scrive sempre in modo affidabile
@@ -640,6 +654,28 @@ input, select, textarea { font-family: inherit; color: inherit; }
 
 /* ── Archivio calendario ─────────────────────────────────────────────────── */
 
+.anniversary-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  background: #f2ead6;
+  border: 1px solid #d8cba4;
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.anniversary-banner svg { color: var(--accent); flex-shrink: 0; }
+
+.anniversary-banner .primary-button {
+  margin-left: auto;
+  min-height: 36px;
+  padding: 0 14px;
+  font-size: 12px;
+}
+
 .calendar-card {
   background: var(--surface);
   border: 1px solid var(--line);
@@ -735,10 +771,32 @@ input, select, textarea { font-family: inherit; color: inherit; }
   padding-bottom: 10px;
 }
 
+.settings-card.wide { grid-column: 1 / -1; }
+
+.settings-card > p { line-height: 1.55; }
+
+/* select in stile carta: niente look nativo */
+select {
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 9px 10px;
+  min-height: 40px;
+}
+
+select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
 .settings-card h2 svg { color: var(--accent); }
 
 .settings-help { margin: 0; font-size: 12px; color: var(--ink-soft); line-height: 1.6; }
 .settings-help.small { font-size: 11px; color: var(--ink-faint); }
+
+.storage-warning { color: #8a4a2e !important; font-weight: 700; }
 
 .settings-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 

@@ -24,6 +24,7 @@ export const QUESTION_POOLS = {
     'Cosa ha funzionato oggi, che avrebbe potuto andare peggio, e cosa posso apprezzare di questo?',
     'Quale piccolo piacere mi sono concesso oggi?',
     'Cosa funziona bene nella mia vita, in questo momento?',
+    'Cosa c’era di bello in qualcosa che oggi ho giudicato brutto? Provo a cercare una crepa di luce.',
   ],
   // Martedì — Processing concreto contro ruminazione (Watkins 2008).
   // Versioni serali: riflettono sulla giornata, mai su azioni nelle ore successive.
@@ -33,6 +34,8 @@ export const QUESTION_POOLS = {
     'Cosa mi è pesato oggi? E qual è il primo passo concreto, anche piccolo, che posso fare domani?',
     'Qual è la cosa più importante che ho fatto oggi?',
     'Cosa posso delegare o semplificare?',
+    'Quale decisione ho preso oggi senza pensarci, che meriterebbe un momento di attenzione?',
+    'Quale abitudine, oggi, ha lavorato per me: una cosa che faccio senza pensarci e che mi ha fatto bene?',
   ],
   // Mercoledì — Self-distancing / prospettiva dell'osservatore (Kross 2014)
   distanza: [
@@ -41,6 +44,8 @@ export const QUESTION_POOLS = {
     'Se guardassi la mia giornata da fuori, come un film, che cosa noterei?',
     'Con chi, oggi, mi sono sentito davvero connesso?',
     'Di chi ho sentito la mancanza?',
+    'Che cosa mi ha infastidito oggi, e se provassi a guardarlo con gli occhi di uno spettatore curioso, che cosa noterei di diverso?',
+    'Oggi ho pensato a qualcuno che non vedo da tempo. Chi era? Quale ricordo preciso mi è tornato?',
   ],
   // Giovedì — Cognitive reappraisal (Gross 1998)
   rilettura: [
@@ -49,6 +54,7 @@ export const QUESTION_POOLS = {
     'Quale pensiero sto giudicando come negativo, ma potrebbe essere solo neutro?',
     'Cosa non dipende da me oggi, e posso lasciar andare?',
     'Cosa ho fatto oggi che era sotto il mio controllo?',
+    'Quale conversazione di oggi, se potessi riscriverla, cambierei? E come?',
   ],
   // Venerdì — Savoring (Bryant 2003)
   savoring: [
@@ -57,6 +63,9 @@ export const QUESTION_POOLS = {
     'Qual è il momento più bello di oggi?',
     'Quale persona ha reso più dolce la mia giornata, e perché?',
     'Cosa mi ha fatto sorridere oggi?',
+    'Cosa mi ha fatto rallentare oggi, anche solo per un respiro, e che cosa ho visto in quel momento?',
+    'Qual è il suono che ricordo di più di oggi: una voce, un silenzio, un rumore di sottofondo?',
+    'Cosa ho fatto oggi che era solo mio: non per dovere, non per compiacere, ma perché lo volevo davvero?',
   ],
   // Sabato — Decisional balance non giudicante (Prochaska & DiClemente 1983)
   osservazione: [
@@ -65,6 +74,9 @@ export const QUESTION_POOLS = {
     'Cosa ho notato, in questo periodo, del mio rapporto con le abitudini?',
     'Come mi sento nel corpo, in questo momento?',
     'Quale abitudine mi è venuta naturale oggi?',
+    'Che cosa ho sentito nel corpo oggi — stanchezza, energia, tensione in un punto preciso — e in che momento l’ho notato per la prima volta?',
+    'Quale pensiero è tornato più spesso oggi? Provo a seguirlo a ritroso: dov’è nato?',
+    'Che cosa mi pesa da più giorni? Stasera provo solo a descriverlo, senza cercare di risolverlo.',
   ],
   // Domenica — Revisione gentile + Best Possible Self (Neff 2003, King 2001)
   revisione: [
@@ -73,6 +85,10 @@ export const QUESTION_POOLS = {
     'Di che cosa ho bisogno in questo momento, e come posso concedermelo nella prossima settimana?',
     'Cosa di questa settimana voglio portare con me? E cosa posso lasciare qui?',
     'Cosa so di me oggi, che non sapevo un anno fa?',
+    'Se tra cinque anni mi capitasse di leggere quello che scrivo stasera, che cosa vorrei che il me di allora capisse di me?',
+    'Se dovessi dire una sola parola per descrivere questa settimana, quale sceglierei? E perché proprio quella?',
+    'Qual è la cosa più vera che ho pensato questa settimana, quella che non ho detto a nessuno?',
+    'Che cosa ho costruito questa settimana: un momento di calma, un legame più stretto, un’idea che prima non c’era?',
   ],
 }
 
@@ -108,6 +124,7 @@ export const WEEKLY_VISUAL = {
   0: [
     'Immagina una stanza vuota con diverse porte. Su ogni porta c’è scritta una parola: «Leggerezza», «Avventura», «Calma», «Legame», «Curiosità». Scegline una, quella che ti chiama oggi. Aprila. Cosa vedi? Entra e guardati intorno: chi c’è, che luce c’è, cosa stai facendo? Scrivi la scena.',
     'Immagina di partecipare, molti anni da oggi, a una cena con le persone a cui vuoi bene. Qualcuno si alza e dice qualcosa su di te: non un elogio formale, ma un ricordo vero, un piccolo momento condiviso. Cosa racconta? Descrivi la scena: la stanza, la luce, le facce.',
+    'Se oggi fosse una fotografia, cosa ci vedrei nell’inquadratura? E che cosa è rimasto fuori?',
   ],
 }
 

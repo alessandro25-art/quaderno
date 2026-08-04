@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, addMonths } from 'date-fns'
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, addDays, parseISO } from 'date-fns'
 import { it } from 'date-fns/locale'
-import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ArrowLeft, ChevronLeft, ChevronRight, Settings, ScrollText } from 'lucide-react'
 
-export default function ArchiveView({ store, notebook, onBack, onOpenDay }) {
+export default function ArchiveView({ store, notebook, onBack, onOpenDay, onOpenSettings }) {
   const [month, setMonth] = useState(() => new Date())
   const [pages, setPages] = useState([])
 
@@ -28,6 +28,17 @@ export default function ArchiveView({ store, notebook, onBack, onOpenDay }) {
   }, [pages])
 
   const firstWeekday = startOfMonth(month).getDay() // 0 = domenica
+
+  // «In questo giorno»: giorni del mese con una pagina esattamente un anno prima.
+  const anniversaries = useMemo(() => {
+    const found = []
+    for (const day of days) {
+      const lastYear = format(addDays(day, -365), 'yyyy-MM-dd')
+      if (byDate[lastYear]) found.push({ today: format(day, 'yyyy-MM-dd'), lastYear })
+    }
+    return found
+  }, [days, byDate])
+
   const weekdayLabels = ['D', 'L', 'M', 'M', 'G', 'V', 'S']
   const today = format(new Date(), 'yyyy-MM-dd')
 
@@ -39,9 +50,23 @@ export default function ArchiveView({ store, notebook, onBack, onOpenDay }) {
           <span className="kicker">ARCHIVIO</span>
           <h1>{notebook.title}</h1>
         </div>
+        <div className="header-actions">
+          <button className="ghost-button" type="button" onClick={onOpenSettings} aria-label="Impostazioni"><Settings size={18} /></button>
+        </div>
       </header>
 
       <div className="calendar-card">
+        {anniversaries.length > 0 && (
+          <div className="anniversary-banner">
+            <ScrollText size={16} />
+            <span>
+              In questo giorno, un anno fa: {format(parseISO(anniversaries[0].lastYear), 'd MMMM yyyy', { locale: it })}
+            </span>
+            <button className="primary-button" type="button" onClick={() => onOpenDay(anniversaries[0].lastYear)}>
+              Rileggi
+            </button>
+          </div>
+        )}
         <div className="calendar-head">
           <button className="ghost-button" type="button" onClick={() => setMonth((m) => addMonths(m, -1))} aria-label="Mese precedente"><ChevronLeft size={18} /></button>
           <h2>{format(month, 'MMMM yyyy', { locale: it })}</h2>

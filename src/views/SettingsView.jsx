@@ -6,6 +6,7 @@ export default function SettingsView({ store, notebooks = [], onNotebooksChanged
   const [paperType, setPaperType] = useState('kindle')
   const [inkColor, setInkColor] = useState('black')
   const [notice, setNotice] = useState('')
+  const [storageInfo, setStorageInfo] = useState(null)
   const fileRef = useRef(null)
 
   useEffect(() => {
@@ -22,6 +23,22 @@ export default function SettingsView({ store, notebooks = [], onNotebooksChanged
     })
     return () => { active = false }
   }, [store])
+
+  // Quota locale: mostra l'uso e avvisa se lo spazio si sta riempiendo.
+  useEffect(() => {
+    let active = true
+    async function measure() {
+      if (!navigator.storage?.estimate) return
+      const estimate = await navigator.storage.estimate()
+      if (!active) return
+      setStorageInfo({
+        usage: estimate.usage ?? 0,
+        quota: estimate.quota ?? 0,
+      })
+    }
+    measure()
+    return () => { active = false }
+  }, [])
 
   async function saveKey(event) {
     event.preventDefault()
@@ -157,7 +174,7 @@ export default function SettingsView({ store, notebooks = [], onNotebooksChanged
           </div>
         </section>
 
-        <section className="settings-card">
+        <section className="settings-card wide">
           <h2><Lock size={15} /> Privacy</h2>
           <p className="settings-help">
             Nessun account, nessun server, nessuna telemetria. Le pagine scritte a mano restano in questo browser.
@@ -168,6 +185,16 @@ export default function SettingsView({ store, notebooks = [], onNotebooksChanged
               {installable ? 'Installa Quaderno' : 'Installa dal menu del browser (su iPhone: Condividi → Aggiungi a Home)'}
             </button>
           )}
+          {storageInfo && storageInfo.quota > 0 && (() => {
+            const ratio = storageInfo.usage / storageInfo.quota
+            const mb = (size) => `${(size / (1024 * 1024)).toFixed(1)} MB`
+            return (
+              <p className={`settings-help small ${ratio > 0.8 ? 'storage-warning' : ''}`} role={ratio > 0.8 ? 'alert' : undefined}>
+                Dati locali: {mb(storageInfo.usage)} di {mb(storageInfo.quota)}
+                {ratio > 0.8 && ' — lo spazio si sta riempiendo: esporta un backup ora.'}
+              </p>
+            )
+          })()}
         </section>
       </div>
 
