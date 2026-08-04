@@ -232,6 +232,15 @@ input, select, textarea { font-family: inherit; color: inherit; }
 
 .notebook-view { display: flex; flex-direction: column; min-height: calc(100vh - 28px); }
 
+.paper-page {
+  animation: page-in 0.35s ease-out;
+}
+
+@keyframes page-in {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: none; }
+}
+
 .page-shell {
   flex: 1;
   display: flex;
@@ -374,6 +383,77 @@ input, select, textarea { font-family: inherit; color: inherit; }
 }
 
 .paper-blank { background: var(--paper); }
+
+/* ── Foglio Kindle (e-ink) ────────────────────────────────────────────────── */
+/* Pagine in stile e-reader: carta calda, inchiostro carboncino, serif quieto,
+   niente righe, niente rilegatura, niente decorazioni. */
+
+.paper-kindle { background: transparent; }
+
+.notebook-view.kindle .spine { display: none; }
+
+.notebook-view.kindle .page-shell { padding: 4px 6px 18px; }
+
+.paper-page.kindle {
+  background: #f4f1e8;
+  border-radius: 2px;
+  box-shadow: 0 12px 34px -14px rgba(60, 55, 45, 0.3);
+}
+
+.paper-page.kindle::before { display: none; }
+
+.paper-page.kindle .page-head { justify-content: center; margin-bottom: 18px; }
+
+.paper-page.kindle .page-date {
+  font-style: normal;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #57513f;
+  transform: none;
+}
+
+.paper-page.kindle .page-notebook { display: none; }
+
+.paper-page.kindle .question-ticket {
+  background: transparent;
+  border: 0;
+  border-top: 1px solid #ddd6c4;
+  border-bottom: 1px solid #ddd6c4;
+  border-radius: 0;
+  box-shadow: none;
+  transform: none;
+  padding: 14px 10px;
+  margin-bottom: 10px;
+  max-width: 640px;
+}
+
+.paper-page.kindle .question-ticket::before { display: none; }
+
+.paper-page.kindle .ticket-label { text-align: center; letter-spacing: 0.26em; color: #a08b4f; }
+
+.paper-page.kindle .question-ticket p {
+  text-align: center;
+  font-size: 22px;
+  font-style: italic;
+  color: #3c372e;
+  line-height: 1.4;
+}
+
+.paper-page.kindle .paper { border: 0; min-height: 420px; }
+
+.paper-page.kindle .page-foot { margin-top: 22px; gap: 10px; }
+
+.paper-page.kindle .foot-line {
+  border-bottom: 0;
+  padding-bottom: 0;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.paper-page.kindle .foot-label { color: #6d6759; font-size: 11px; font-weight: 700; }
+
+.paper-page.kindle .foot-text { font-size: 17px; color: #4a4438; text-align: right; }
 
 /* Footer stampato */
 .page-foot { margin-top: 20px; margin-bottom: 8px; display: grid; gap: 8px; position: relative; }
@@ -558,6 +638,21 @@ input, select, textarea { font-family: inherit; color: inherit; }
 .settings-help.small { font-size: 11px; color: var(--ink-faint); }
 
 .settings-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.notebook-paper-list { display: grid; gap: 8px; padding-top: 4px; }
+
+.notebook-paper-row {
+  display: grid;
+  grid-template-columns: 1fr minmax(140px, 200px);
+  gap: 10px;
+  align-items: center;
+  font-size: 12px;
+  color: var(--ink);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.notebook-paper-row select { min-height: 42px; }
 
 /* ── Notifiche e boot ────────────────────────────────────────────────────── */
 

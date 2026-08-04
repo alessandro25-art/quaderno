@@ -30,6 +30,7 @@ export default function NotebookView({ store, notebook, initialDate = null, onBa
   const canvasRef = useRef(null)
 
   const question = questionForDate(date)
+  const kindle = notebook.paperType === 'kindle'
 
   useEffect(() => {
     let active = true
@@ -124,7 +125,7 @@ export default function NotebookView({ store, notebook, initialDate = null, onBa
   ]
 
   return (
-    <div className="notebook-view">
+    <div className={`notebook-view ${kindle ? 'kindle' : ''}`}>
       <header className="app-header">
         <button className="ghost-button" type="button" onClick={onBack} aria-label="Torna ai quaderni"><ArrowLeft size={18} /></button>
         <div className="header-title">
@@ -139,7 +140,7 @@ export default function NotebookView({ store, notebook, initialDate = null, onBa
 
       <div className="page-shell">
         <aside className="spine" aria-hidden="true" />
-        <article className="paper-page" data-page={page?.id}>
+        <article className={`paper-page ${kindle ? 'kindle' : ''}`} key={page?.id ?? date} data-page={page?.id}>
           <div className="page-head">
             <span className="page-date">{format(parseISO(date), 'EEEE d MMMM yyyy', { locale: it })}</span>
             <span className="page-notebook">{notebook.title}</span>

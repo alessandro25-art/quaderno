@@ -27,7 +27,7 @@ export default function App({ store: providedStore } = {}) {
         id: crypto.randomUUID(),
         title: 'Diario',
         coverColor: '#6b4f3a',
-        paperType: 'lined',
+        paperType: 'kindle',
         createdAt: now,
         updatedAt: now,
       })
@@ -90,6 +90,8 @@ export default function App({ store: providedStore } = {}) {
       {view === VIEWS.SETTINGS && (
         <SettingsView
           store={store}
+          notebooks={notebooks}
+          onNotebooksChanged={refresh}
           onBack={() => setView(current ? VIEWS.NOTEBOOK : VIEWS.COVER)}
           onInstall={handleInstall}
           installable={installable}

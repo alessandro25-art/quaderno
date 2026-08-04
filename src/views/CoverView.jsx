@@ -12,11 +12,12 @@ export default function CoverView({ store, notebooks, onOpen, onChanged }) {
     event.preventDefault()
     const name = title.trim() || 'Diario'
     const now = new Date().toISOString()
+    const paperType = (await store.getSetting('paperType')) || 'kindle'
     const notebook = {
       id: crypto.randomUUID(),
       title: name,
       coverColor: color,
-      paperType: 'lined',
+      paperType,
       createdAt: now,
       updatedAt: now,
     }

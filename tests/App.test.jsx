@@ -12,11 +12,13 @@ function makeStore() {
 describe('quaderno app', () => {
   afterEach(cleanup)
 
-  it('boots and creates the first notebook automatically', async () => {
+  it('boots and creates the first notebook automatically with kindle paper', async () => {
     const store = makeStore()
     render(<App store={store} />)
     await screen.findByText('Diario')
-    expect(await store.listNotebooks()).toHaveLength(1)
+    const notebooks = await store.listNotebooks()
+    expect(notebooks).toHaveLength(1)
+    expect(notebooks[0].paperType).toBe('kindle')
   })
 
   it('opens the notebook and shows today question + paper + closing ritual', async () => {

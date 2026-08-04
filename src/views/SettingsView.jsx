@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, Download, Upload, KeyRound, Lock, Paperclip } from 'lucide-react'
 
-export default function SettingsView({ store, onBack, onInstall, installable, isStandalone }) {
+export default function SettingsView({ store, notebooks = [], onNotebooksChanged, onBack, onInstall, installable, isStandalone }) {
   const [apiKey, setApiKey] = useState('')
-  const [paperType, setPaperType] = useState('lined')
+  const [paperType, setPaperType] = useState('kindle')
   const [inkColor, setInkColor] = useState('black')
   const [notice, setNotice] = useState('')
   const fileRef = useRef(null)
@@ -12,7 +12,7 @@ export default function SettingsView({ store, onBack, onInstall, installable, is
     let active = true
     Promise.all([
       store.getSetting('apiKey', ''),
-      store.getSetting('paperType', 'lined'),
+      store.getSetting('paperType', 'kindle'),
       store.getSetting('inkColor', 'black'),
     ]).then(([key, paper, ink]) => {
       if (!active) return
@@ -76,8 +76,9 @@ export default function SettingsView({ store, onBack, onInstall, installable, is
         <section className="settings-card">
           <h2><Paperclip size={15} /> Pagina e inchiostro</h2>
           <label>
-            Tipo di foglio
+            Foglio predefinito per i nuovi quaderni
             <select value={paperType} onChange={(event) => { setPaperType(event.target.value); savePreference('paperType', event.target.value) }}>
+              <option value="kindle">Kindle (e-ink)</option>
               <option value="lined">Righe</option>
               <option value="grid">Quadretti</option>
               <option value="dotted">Puntinato</option>
@@ -93,6 +94,30 @@ export default function SettingsView({ store, onBack, onInstall, installable, is
               <option value="red">Rosso</option>
             </select>
           </label>
+          {notebooks.length > 0 && (
+            <div className="notebook-paper-list">
+              <span className="settings-help">Foglio dei quaderni esistenti:</span>
+              {notebooks.map((notebook) => (
+                <label key={notebook.id} className="notebook-paper-row">
+                  <span>{notebook.title}</span>
+                  <select
+                    aria-label={`Foglio di ${notebook.title}`}
+                    value={notebook.paperType}
+                    onChange={async (event) => {
+                      await store.saveNotebook({ ...notebook, paperType: event.target.value })
+                      onNotebooksChanged?.()
+                    }}
+                  >
+                    <option value="kindle">Kindle</option>
+                    <option value="lined">Righe</option>
+                    <option value="grid">Quadretti</option>
+                    <option value="dotted">Puntinato</option>
+                    <option value="blank">Bianco</option>
+                  </select>
+                </label>
+              ))}
+            </div>
+          )}
         </section>
 
         <section className="settings-card">
