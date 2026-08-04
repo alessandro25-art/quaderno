@@ -11,6 +11,8 @@ Quaderno è una PWA local-first di journaling: la scrittura a mano resta sul dis
 - **Zero giudizio**: nessun punteggio, nessuna streak, nessun conteggio. Le domande sono suggerimenti; nei giorni difficili basta una riga.
 - **Quaderni multipli**: copertine, colori, pagine per data, archivio a calendario.
 - **Inchiostro**: pressione e inclinazione della Pencil, 3 larghezze, 4 colori, evidenziatore, gomma, undo/redo, zoom 1–3×.
+- **Solo penna**: il dito e il palmo non disegnano mai (touch-action pan-y: il dito scorre la pagina, la Pencil scrive).
+- **Doppio tap della Pencil**: due tocchetti rapidi con la punta (o il doppio tap laterale, dove il sistema lo inoltra) alternano penna ↔ gomma.
 - **Fogli**: righe, quadretti, puntinato, bianco — per quaderno.
 - **Export**: PDF della pagina, backup JSON completo con ripristino.
 - **Riconoscimento scrittura (opzionale)**: attivalo pagina per pagina; serve una API key Google Cloud Vision (gratis fino a 1000 pagine/mese) che resta solo sul dispositivo. Spento di default.

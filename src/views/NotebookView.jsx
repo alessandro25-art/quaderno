@@ -17,7 +17,7 @@ const PEN_OPTIONS = [
   { id: 'thick', label: 'Grossa', width: PEN_WIDTHS.thick },
 ]
 
-const SECTION_HEIGHTS = { large: 320, medium: 220, small: 130 }
+const SECTION_HEIGHTS = { large: 400, medium: 290, small: 175 }
 
 export default function NotebookView({ store, notebook, initialDate = null, onBack, onOpenArchive, onOpenSettings }) {
   const [date, setDate] = useState(() => initialDate ?? format(new Date(), 'yyyy-MM-dd'))
@@ -130,6 +130,11 @@ export default function NotebookView({ store, notebook, initialDate = null, onBa
     setDate((current) => format(addDays(parseISO(current), delta), 'yyyy-MM-dd'))
   }
 
+  // Doppio tap della penna: alterna penna ↔ gomma (come il doppio tap della Pencil 2).
+  function handlePenDoubleTap() {
+    setTool((current) => (current === TOOLS.PEN || current === TOOLS.HIGHLIGHTER ? TOOLS.ERASER : TOOLS.PEN))
+  }
+
   const toolOptions = [
     { id: 'pen', label: 'Penna', icon: PenLine, active: tool === TOOLS.PEN },
     { id: 'highlighter', label: 'Evidenziatore', icon: Highlighter, active: tool === TOOLS.HIGHLIGHTER },
@@ -179,6 +184,7 @@ export default function NotebookView({ store, notebook, initialDate = null, onBa
                 section={section.id}
                 minHeight={SECTION_HEIGHTS[section.size] ?? 190}
                 onFocus={setActiveSection}
+                onDoubleTap={handlePenDoubleTap}
               />
             </section>
           ))}

@@ -86,6 +86,52 @@ try {
   })
   report.desktop.undoWorks = before === afterUndo
 
+  // Il dito NON disegna: un drag touch non deve lasciare tracce.
+  const beforeTouch = await page.evaluate(() => document.querySelector('.ink-layer').toDataURL())
+  await page.evaluate(() => {
+    const canvas = document.querySelector('.ink-layer')
+    const rect = canvas.getBoundingClientRect()
+    const opts = (x, y, type) => new PointerEvent(type, {
+      pointerId: 10, pointerType: 'touch', isPrimary: true, bubbles: true,
+      clientX: rect.left + x, clientY: rect.top + y, pressure: 0.5,
+    })
+    canvas.dispatchEvent(opts(80, 80, 'pointerdown'))
+    for (let i = 1; i <= 8; i += 1) {
+      canvas.dispatchEvent(opts(80 + i * 16, 80 + i * 10, 'pointermove'))
+    }
+    canvas.dispatchEvent(opts(208, 160, 'pointerup'))
+  })
+  await page.waitForTimeout(300)
+  const afterTouch = await page.evaluate(() => document.querySelector('.ink-layer').toDataURL())
+  report.desktop.touchBlocked = beforeTouch === afterTouch
+
+  // Doppio tap della penna: due tocchetti rapidi → si passa a gomma, poi di nuovo a penna.
+  async function penTap(pointerId, x, y) {
+    await page.evaluate(({ pointerId, x, y }) => {
+      const canvas = document.querySelector('.ink-layer')
+      const rect = canvas.getBoundingClientRect()
+      const opts = (type) => new PointerEvent(type, {
+        pointerId, pointerType: 'pen', isPrimary: true, bubbles: true,
+        clientX: rect.left + x, clientY: rect.top + y, pressure: 0.9,
+      })
+      canvas.dispatchEvent(opts('pointerdown'))
+      canvas.dispatchEvent(opts('pointerup'))
+    }, { pointerId, x, y })
+  }
+  await penTap(21, 300, 150)
+  await penTap(22, 300, 150)
+  await page.waitForTimeout(400)
+  report.desktop.doubleTapEraser = await page.locator('.tool-button[aria-label="Gomma"]').evaluate(
+    (element) => element.classList.contains('active'),
+  )
+  report.desktop.doubleTapClean = before === await page.evaluate(() => document.querySelector('.ink-layer').toDataURL())
+  await penTap(23, 300, 150)
+  await penTap(24, 300, 150)
+  await page.waitForTimeout(400)
+  report.desktop.doubleTapPen = await page.locator('.tool-button[aria-label="Penna"]').evaluate(
+    (element) => element.classList.contains('active'),
+  )
+
   // PWA manifest e icone.
   report.pwa = await page.evaluate(async () => {
     const manifest = await (await fetch('manifest.webmanifest')).json()
@@ -138,6 +184,10 @@ const failed =
   report.mobile.overflowX > 1 ||
   !report.desktop.inkDrawn ||
   !report.desktop.undoWorks ||
+  !report.desktop.touchBlocked ||
+  !report.desktop.doubleTapEraser ||
+  !report.desktop.doubleTapClean ||
+  !report.desktop.doubleTapPen ||
   !report.offline.reloadWorked ||
   report.pwa?.iconStatuses?.some((asset) => asset.status !== 200)
 

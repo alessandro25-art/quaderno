@@ -1,11 +1,12 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
-import { TOOLS, drawStroke, pointerToSample, smoothedSamples, PalmGuard } from '../domain/ink.js'
+import { TOOLS, drawStroke, pointerToSample, smoothedSamples } from '../domain/ink.js'
 import { UndoManager } from '../domain/undo.js'
 
 /**
- * Tela di scrittura a mano: Apple Pencil (pressure/tilt) + touch con palm rejection.
- * Layer compositing: i tratti confermati vivono su un canvas offscreen, il tratto
- * attivo su un canvas trasparente sopra — nessun ri-render completo durante la scrittura.
+ * Tela di scrittura a mano: disegna SOLO la Apple Pencil (e il mouse su desktop).
+ * Il dito e il palmo non disegnano mai: con `touch-action: pan-y` il dito scorre
+ * la pagina, e la penna scrive. Doppio tap rapido della punta → onDoubleTap
+ * (usato per alternare penna ↔ gomma, come il doppio tap laterale della Pencil 2).
  */
 const InkCanvas = forwardRef(function InkCanvas({
   strokes,
@@ -19,6 +20,7 @@ const InkCanvas = forwardRef(function InkCanvas({
   section = 'free',
   minHeight = 200,
   onFocus,
+  onDoubleTap,
   disabled = false,
 }, ref) {
   const containerRef = useRef(null)
@@ -28,7 +30,7 @@ const InkCanvas = forwardRef(function InkCanvas({
   const currentStrokeRef = useRef(null)
   const undoRef = useRef(new UndoManager(50))
   const strokesRef = useRef(strokes)
-  const guardRef = useRef(new PalmGuard())
+  const lastTinyTapRef = useRef(null)
 
   strokesRef.current = strokes
 
@@ -93,18 +95,9 @@ const InkCanvas = forwardRef(function InkCanvas({
 
   function startStroke(event) {
     if (disabled) return
-    if (event.pointerType === 'touch') {
-      const local = toLocal(event)
-      if (guardRef.current.shouldIgnoreTouch(local.x * zoom, local.y * zoom)) return
-      drawingRef.current = true
-    } else if (event.pointerType === 'pen') {
-      const local = toLocal(event)
-      guardRef.current.notePen(local.x * zoom, local.y * zoom)
-      drawingRef.current = true
-    } else {
-      drawingRef.current = true
-    }
-    if (!drawingRef.current) return
+    // Solo penna e mouse disegnano. Dito e palmo: mai (il dito deve scorrere la pagina).
+    if (event.pointerType !== 'pen' && event.pointerType !== 'mouse') return
+    drawingRef.current = true
     event.preventDefault()
     try {
       activeRef.current.setPointerCapture(event.pointerId)
@@ -120,6 +113,7 @@ const InkCanvas = forwardRef(function InkCanvas({
       color,
       width,
       opacity: 1,
+      pointerType: event.pointerType,
       samples: [toLocal(event)],
       createdAt: Date.now(),
     }
@@ -152,6 +146,16 @@ const InkCanvas = forwardRef(function InkCanvas({
     onStrokesChange(next)
   }
 
+  function isTinyStroke(stroke) {
+    if (stroke.samples.length > 6) return false
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
+    for (const point of stroke.samples) {
+      minX = Math.min(minX, point.x); minY = Math.min(minY, point.y)
+      maxX = Math.max(maxX, point.x); maxY = Math.max(maxY, point.y)
+    }
+    return (maxX - minX) <= 16 && (maxY - minY) <= 16
+  }
+
   function endStroke(event) {
     if (!drawingRef.current) return
     event.preventDefault()
@@ -160,6 +164,28 @@ const InkCanvas = forwardRef(function InkCanvas({
     currentStrokeRef.current = null
     if (!stroke || stroke.samples.length === 0) return
     const final = { ...stroke, samples: smoothedSamples(stroke.samples) }
+
+    // Doppio tap della penna (due tocchetti rapidi e minuscoli) → cambia strumento,
+    // anche quando si è già in modalità gomma.
+    if (stroke.pointerType === 'pen' && isTinyStroke(final)) {
+      const now = Date.now()
+      const previous = lastTinyTapRef.current
+      if (previous && now - previous.time <= 350) {
+        lastTinyTapRef.current = null
+        if (tool !== TOOLS.ERASER) {
+          const remaining = strokesRef.current.filter(
+            (existing) => existing.id !== previous.id && existing.id !== final.id,
+          )
+          if (remaining.length !== strokesRef.current.length) commit(remaining)
+        }
+        onDoubleTap?.(final)
+        clearActive()
+        return
+      }
+      lastTinyTapRef.current = { id: final.id, time: now }
+    } else {
+      lastTinyTapRef.current = null
+    }
 
     if (tool === TOOLS.ERASER) {
       const remaining = strokesRef.current.filter((existing) => !intersects(existing, final))
