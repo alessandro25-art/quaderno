@@ -73,7 +73,7 @@ try {
 
   // ── BOOT ────────────────────────────────────────────────────────────────
   await page.goto(baseURL, { waitUntil: 'networkidle' })
-  await page.getByRole('heading', { name: 'Quaderno' }).waitFor()
+  await page.getByRole('heading', { name: /i tuoi quaderni/i }).waitFor()
   check('boot: cover mostrata', true)
   await page.screenshot({ path: qaPath('01-cover.png') })
 
@@ -248,13 +248,13 @@ try {
 
   // ── OFFLINE ─────────────────────────────────────────────────────────────
   await page.goto(baseURL, { waitUntil: 'networkidle' })
-  await page.getByRole('heading', { name: 'Quaderno' }).waitFor()
+  await page.getByRole('heading', { name: /i tuoi quaderni/i }).waitFor()
   await page.locator('.notebook-card').first().click()
   await page.getByText('Domanda del giorno').first().waitFor()
   const ctx = page.context()
   await ctx.setOffline(true)
   await page.reload({ waitUntil: 'domcontentloaded' })
-  await page.getByRole('heading', { name: 'Quaderno' }).waitFor()
+  await page.getByRole('heading', { name: /i tuoi quaderni/i }).waitFor()
   check('offline: app funziona senza rete', await page.locator('.notebook-card').first().isVisible())
   await ctx.setOffline(false)
 

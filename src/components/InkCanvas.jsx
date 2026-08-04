@@ -1,13 +1,6 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
 import { TOOLS, drawStroke, pointerToSample, smoothedSamples } from '../domain/ink.js'
 import { UndoManager } from '../domain/undo.js'
-
-/**
- * Tela di scrittura a mano: disegna SOLO la Apple Pencil (e il mouse su desktop).
- * Il dito e il palmo non disegnano mai: con `touch-action: pan-y` il dito scorre
- * la pagina, e la penna scrive. Doppio tap rapido della punta → onDoubleTap
- * (usato per alternare penna ↔ gomma, come il doppio tap laterale della Pencil 2).
- */
 const InkCanvas = forwardRef(function InkCanvas({
   strokes,
   onStrokesChange,
@@ -18,7 +11,7 @@ const InkCanvas = forwardRef(function InkCanvas({
   paperType = 'lined',
   pageId = null,
   section = 'free',
-  minHeight = 200,
+  placeholderChar = '',
   onFocus,
   onDoubleTap,
   disabled = false,
@@ -229,12 +222,15 @@ const InkCanvas = forwardRef(function InkCanvas({
     <div
       ref={containerRef}
       className={`paper paper-${paperType}`}
-      style={{ minHeight }}
+      style={{ minHeight: 'var(--section-height, calc(100dvh - 350px))' }}
       onPointerDown={startStroke}
       onPointerMove={moveStroke}
       onPointerUp={endStroke}
       onPointerCancel={endStroke}
     >
+      {strokes.length === 0 && placeholderChar && (
+        <span className="drop-cap-ghost" aria-hidden="true">{placeholderChar}</span>
+      )}
       <canvas ref={layerRef} className="ink-layer" aria-hidden="true" />
       <canvas ref={activeRef} className="ink-layer" aria-hidden="true" />
     </div>

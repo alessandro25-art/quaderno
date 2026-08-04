@@ -8,6 +8,9 @@ import { registerSW } from 'virtual:pwa-register'
 
 export const VIEWS = { COVER: 'cover', NOTEBOOK: 'notebook', ARCHIVE: 'archive', SETTINGS: 'settings' }
 
+// Accento del giorno: una tinta calda diversa ogni giorno (identità cromatica sottile).
+const DAY_PALETTE = ['#b8860b', '#c45a3c', '#6b7b3a', '#8b6914', '#a0523c', '#b87c4b']
+
 export default function App({ store: providedStore } = {}) {
   const [store] = useState(() => providedStore ?? createJournalStore())
   const [view, setView] = useState(VIEWS.COVER)
@@ -60,6 +63,14 @@ export default function App({ store: providedStore } = {}) {
     if (navigator.storage?.persist) {
       navigator.storage.persist().catch(() => {})
     }
+  }, [])
+
+  // Colore del giorno: accento dinamico (sottile, ma dà identità a ogni giornata).
+  useEffect(() => {
+    const now = new Date()
+    const start = new Date(now.getFullYear(), 0, 0)
+    const day = Math.floor((now - start) / 86400000)
+    document.documentElement.style.setProperty('--accent-soft', DAY_PALETTE[day % DAY_PALETTE.length])
   }, [])
 
   // Promemoria serale: notifica gentile quando l'app è aperta all'ora scelta.

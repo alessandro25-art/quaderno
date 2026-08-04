@@ -36,8 +36,6 @@ function gentleNoteFor(dateValue) {
   return GENTLE_NOTES[((day % GENTLE_NOTES.length) + GENTLE_NOTES.length) % GENTLE_NOTES.length]
 }
 
-const FULL_SECTION_HEIGHT = 'calc(100dvh - 350px)'
-
 export default function NotebookView({ store, notebook, initialDate = null, onBack, onOpenArchive, onOpenSettings }) {
   const [date, setDate] = useState(() => initialDate ?? format(new Date(), 'yyyy-MM-dd'))
   const [page, setPage] = useState(null)
@@ -61,6 +59,7 @@ export default function NotebookView({ store, notebook, initialDate = null, onBa
   // attuale del quaderno (così cambiarlo in Impostazioni si vede subito).
   const hasInk = Object.values(strokesBySection).some((list) => list.length > 0)
   const paperType = hasInk ? (page?.paperType ?? notebook.paperType) : notebook.paperType
+  const writtenCount = structure.filter((section) => (strokesBySection[section.id]?.length ?? 0) > 0).length
 
   // Ogni nuovo giorno riparte dalla prima domanda.
   useEffect(() => {
@@ -213,6 +212,9 @@ export default function NotebookView({ store, notebook, initialDate = null, onBa
           <div className="page-head">
             <span className="page-date">{format(parseISO(date), 'EEEE d MMMM yyyy', { locale: it })}</span>
             <span className="page-notebook">{notebook.title}</span>
+            {writtenCount > 0 && (
+              <span className="written-badge" title="Risposte scritte oggi">{writtenCount}/{structure.length} ✍️</span>
+            )}
           </div>
 
           <div className="section-progress" aria-label="Progresso della giornata">
@@ -239,7 +241,7 @@ export default function NotebookView({ store, notebook, initialDate = null, onBa
               paperType={paperType}
               pageId={page?.id}
               section={current.id}
-              minHeight={FULL_SECTION_HEIGHT}
+              placeholderChar={current.text.trim().charAt(0)}
               onFocus={setActiveSection}
               onDoubleTap={handlePenDoubleTap}
             />
@@ -292,26 +294,39 @@ export default function NotebookView({ store, notebook, initialDate = null, onBa
                   <span className="pen-dot" style={{ width: option.width * 3, height: option.width * 3 }} />
                 </button>
               ))}
-              <span className="toolbar-separator" aria-hidden="true" />
-              {Object.entries(INK_COLORS).map(([name, value]) => (
-                <button
-                  key={name}
-                  type="button"
-                  className={`color-dot ${color === value ? 'active' : ''}`}
-                  aria-label={`Inchiostro ${COLOR_LABELS[name] ?? name}`}
-                  aria-pressed={color === value}
-                  onClick={() => setColor(value)}
-                >
-                  <span style={{ background: value }} />
-                </button>
-              ))}
             </>
           )}
+          <span className="toolbar-separator" aria-hidden="true" />
+          {Object.entries(INK_COLORS).map(([name, value]) => (
+            <button
+              key={name}
+              type="button"
+              className={`color-dot ${color === value && tool === TOOLS.PEN ? 'active' : ''} ${tool !== TOOLS.PEN ? 'disabled' : ''}`}
+              aria-label={`Inchiostro ${COLOR_LABELS[name] ?? name}`}
+              aria-pressed={color === value && tool === TOOLS.PEN}
+              disabled={tool !== TOOLS.PEN}
+              onClick={() => setColor(value)}
+            >
+              <span style={{ background: value, opacity: tool === TOOLS.PEN ? 1 : 0.35 }} />
+            </button>
+          ))}
         </div>
 
         <div className="toolbar-group">
-          <button className="ghost-button" type="button" onClick={() => canvasRefs.current[activeSection]?.undo()} aria-label="Annulla"><Undo2 size={18} /></button>
-          <button className="ghost-button" type="button" onClick={() => canvasRefs.current[activeSection]?.redo()} aria-label="Rifai"><Redo2 size={18} /></button>
+          <button
+            className="ghost-button"
+            type="button"
+            onClick={() => canvasRefs.current[activeSection]?.undo()}
+            aria-label="Annulla"
+            disabled={!canvasRefs.current[activeSection]?.canUndo()}
+          ><Undo2 size={18} /></button>
+          <button
+            className="ghost-button"
+            type="button"
+            onClick={() => canvasRefs.current[activeSection]?.redo()}
+            aria-label="Rifai"
+            disabled={!canvasRefs.current[activeSection]?.canRedo()}
+          ><Redo2 size={18} /></button>
           <span className="toolbar-separator" aria-hidden="true" />
           <button className="ghost-button" type="button" onClick={() => setZoom((z) => Math.max(1, Math.round((z - 0.25) * 100) / 100))} aria-label="Riduci zoom"><ZoomOut size={18} /></button>
           <span className="zoom-value">{Math.round(zoom * 100)}%</span>

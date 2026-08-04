@@ -211,8 +211,13 @@ export default function SettingsView({ store, notebooks = [], onNotebooksChanged
           </p>
           {!isStandalone && (
             <button className="primary-button" type="button" onClick={onInstall} disabled={!installable}>
-              {installable ? 'Installa Quaderno' : 'Installa dal menu del browser (su iPhone: Condividi → Aggiungi a Home)'}
+              Installa Quaderno
             </button>
+          )}
+          {!isStandalone && !installable && (
+            <p className="settings-help small">
+              Su iPhone: Condividi → Aggiungi a Home. Su desktop: menu del browser → Installa app.
+            </p>
           )}
           {storageInfo && storageInfo.quota > 0 && (() => {
             const ratio = storageInfo.usage / storageInfo.quota

@@ -23,7 +23,12 @@ export default function ArchiveView({ store, notebook, onBack, onOpenDay, onOpen
   useEffect(() => {
     let active = true
     store.listPages(notebook.id).then((all) => {
-      if (active) setPages(all)
+      if (!active) return
+      setPages(all)
+      // Default: mese dell'ultima pagina scritta, non il mese corrente.
+      if (all.length > 0) {
+        setMonth((current) => current ?? startOfMonth(parseISO(all[all.length - 1].date)))
+      }
     })
     return () => { active = false }
   }, [store, notebook.id])

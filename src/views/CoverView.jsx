@@ -31,8 +31,8 @@ export default function CoverView({ store, notebooks, onOpen, onChanged }) {
     <div className="cover-view">
       <header className="app-header">
         <div className="header-title">
-          <span className="kicker">I TUOI QUADERNI</span>
-          <h1>Quaderno</h1>
+          <span className="kicker">QUADERNO</span>
+          <h1>I tuoi quaderni</h1>
         </div>
         <button className="primary-button" type="button" onClick={() => setCreating((v) => !v)}>
           <Plus size={16} /> Nuovo quaderno

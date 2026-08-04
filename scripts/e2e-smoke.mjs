@@ -37,7 +37,7 @@ try {
   })
 
   await page.goto(baseURL, { waitUntil: 'networkidle' })
-  await page.getByRole('heading', { name: 'Quaderno' }).waitFor()
+  await page.getByRole('heading', { name: /i tuoi quaderni/i }).waitFor()
   const card = page.locator('.notebook-card').first()
   await card.waitFor()
   const cardTitle = await card.locator('.notebook-title').innerText()
@@ -48,6 +48,8 @@ try {
   await page.getByText('Domanda del giorno').first().waitFor()
   const question = await page.locator('.page-section').first().locator('.section-prompt').innerText()
   report.desktop.question = question
+  // Attesa per l'animazione di ingresso della sezione (coordinate stabili per il disegno).
+  await page.waitForTimeout(600)
 
   // Disegna un tratto con la "pencil" via Pointer Events sintetici.
   const before = await page.evaluate(() => {
@@ -74,10 +76,12 @@ try {
     return canvas.toDataURL()
   })
   report.desktop.inkDrawn = before !== after
-  await page.screenshot({ path: new URL('quaderno-page.png', artifacts).pathname, fullPage: true })
+  await page.screenshot({ path: new URL('quaderno-page.png', artifacts).pathname })
 
-  // Undo: il tratto deve sparire.
-  await page.keyboard.press('Control+z')
+  // Undo: il tratto deve sparire (dispatch diretto: indipendente dal focus).
+  await page.evaluate(() => {
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', ctrlKey: true, bubbles: true }))
+  })
   await page.waitForTimeout(300)
   const afterUndo = await page.evaluate(() => {
     const canvas = document.querySelector('.ink-layer')
