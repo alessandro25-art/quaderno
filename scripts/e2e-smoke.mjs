@@ -46,7 +46,7 @@ try {
 
   await card.click()
   await page.getByText('Domanda del giorno').waitFor()
-  await page.getByText(/Cosa posso lasciare non risolto fino a domani/i).waitFor()
+  await page.getByText(/Che cosa posso lasciar andare stasera/i).waitFor()
   const question = await page.locator('.page-section').first().locator('.section-prompt').innerText()
   report.desktop.question = question
 

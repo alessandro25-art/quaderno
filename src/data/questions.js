@@ -25,11 +25,12 @@ export const QUESTION_POOLS = {
     'Quale piccolo piacere mi sono concesso oggi?',
     'Cosa funziona bene nella mia vita, in questo momento?',
   ],
-  // Martedì — Processing concreto contro ruminazione (Watkins 2008)
+  // Martedì — Processing concreto contro ruminazione (Watkins 2008).
+  // Versioni serali: riflettono sulla giornata, mai su azioni nelle ore successive.
   concreto: [
-    'Se smetto di chiedermi "perché" e mi chiedo "che cosa posso fare di specifico nelle prossime due ore", che cosa rispondo?',
+    'Se smetto di chiedermi "perché" e mi chiedo "che cosa posso fare di specifico, domani", che cosa rispondo?',
     'Quale dettaglio concreto di oggi ho trascurato, e che cosa mi dice?',
-    'Cosa mi sta pesando, in questo momento? E qual è il primo passo concreto che posso fare?',
+    'Cosa mi è pesato oggi? E qual è il primo passo concreto, anche piccolo, che posso fare domani?',
     'Qual è la cosa più importante che ho fatto oggi?',
     'Cosa posso delegare o semplificare?',
   ],
@@ -113,9 +114,13 @@ export const WEEKLY_VISUAL = {
 export const VISUAL_QUESTIONS = Object.entries(WEEKLY_VISUAL)
   .flatMap(([day, texts]) => texts.map((text) => ({ theme: 'immagine', day: Number(day), text })))
 
-export const CLOSING_QUESTION = 'Cosa posso lasciare non risolto fino a domani?'
+// Rituale di chiusura pensato per la sera: il senso è "appoggio qui le
+// preoccupazioni e vado a dormire", non "risolvo entro domani".
+export const CLOSING_QUESTION = 'Che cosa posso lasciar andare stasera, per dormire tranquillo?'
 export const SATISFACTION_PROMPT = 'Una cosa di oggi di cui sono soddisfatto:'
-export const MICROSTEP_PROMPT = 'Micro-passo di domani: una cosa che dipende da me'
+// Micro-passo concreto: non "una cosa che dipende da me" (generico), ma una
+// cosa precisa con l'ora in cui verrà fatta — così ha un gancio nel domani.
+export const MICROSTEP_PROMPT = 'Il mio micro-passo per domani: che cosa farò, e quando?'
 
 const DAY_MS = 86400000
 

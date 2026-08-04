@@ -28,8 +28,8 @@ describe('quaderno app', () => {
     await waitFor(() => {
       expect(screen.getByText(/Domanda del giorno/i)).toBeInTheDocument()
     })
-    expect(screen.getByText(/Cosa posso lasciare non risolto fino a domani\?/i)).toBeInTheDocument()
-    expect(screen.getByText(/Micro-passo di domani/i)).toBeInTheDocument()
+    expect(screen.getByText(/Che cosa posso lasciar andare stasera/i)).toBeInTheDocument()
+    expect(screen.getByText(/Il mio micro-passo per domani/i)).toBeInTheDocument()
     expect(screen.getAllByText(/Visualizzazione/i).length).toBeGreaterThanOrEqual(1)
     // ogni domanda ha il suo spazio di scrittura dedicato (2 canvas per sezione)
     expect(document.querySelectorAll('.page-section')).toHaveLength(5)

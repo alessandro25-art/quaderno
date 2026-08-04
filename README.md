@@ -6,7 +6,7 @@ Quaderno è una PWA local-first di journaling: la scrittura a mano resta sul dis
 
 ## Come funziona
 
-- **Una pagina al giorno, strutturata**: ogni domanda ha il **suo spazio di scrittura**. La pagina ha 5 sezioni: domanda riflessiva (tecnica del giorno), domanda di visualizzazione, micro-passo, "Cosa posso lasciare non risolto fino a domani?", "Una cosa di cui sono soddisfatto".
+- **Una pagina al giorno, strutturata**: ogni domanda ha il **suo spazio di scrittura**. La pagina ha 5 sezioni: domanda riflessiva (tecnica del giorno), domanda di visualizzazione, micro-passo concreto ("che cosa farò, e quando?"), chiusura serale ("Che cosa posso lasciar andare stasera, per dormire tranquillo?"), "Una cosa di cui sono soddisfatto". Tutte le domande riflettono sulla giornata: l'app si usa la sera.
 - **Domande basate su tecniche con evidenza**: rotazione settimanale — lunedì gratitudine (Emmons), martedì concretizzare (Watkins), mercoledì distanza (Kross), giovedì rileggere (Gross), venerdì savoring (Bryant), sabato osservare (Prochaska/DiClemente), domenica revisione gentile (Neff/King). Visualizzazione: BPS, lettera al sé futuro, esternalizzazione, sedia vuota, inner mentor, luogo sicuro e altre.
 - **Zero giudizio**: nessun punteggio, nessuna streak, nessun conteggio. Le domande sono suggerimenti; nei giorni difficili basta una riga.
 - **Quaderni multipli**: copertine, colori, pagine per data, archivio a calendario.

@@ -7,7 +7,7 @@ Una PWA di journaling per iPad con Apple Pencil che si senta **come un quaderno 
 ## Principi (dal report sui libri)
 
 - **Mai giudicante**: zero punteggi, zero streak, zero "counting days" (l'utente è ex-fumatore/ex-consumatore: le ricadute non sono fallimenti, si osservano).
-- **1 domanda + micro-passo**: struttura quotidiana leggera, chiusura con "Cosa posso lasciare non risolto fino a domani?".
+- **1 domanda + micro-passo**: struttura quotidiana leggera, chiusura serale con "Che cosa posso lasciar andare stasera, per dormire tranquillo?".
 - **Flessibilità**: nei giorni difficili basta una riga; la domanda è un suggerimento, mai un obbligo.
 - **Privacy locale**: IndexedDB, nessun account; il riconoscimento scrittura è cloud ma **default spento** e per-pagina.
 
@@ -15,7 +15,7 @@ Una PWA di journaling per iPad con Apple Pencil che si senta **come un quaderno 
 
 1. Domanda del giorno + spazio libero (Mini Morning Pages, Cameron) — 32 domande in 8 temi, deterministiche per data.
 2. Micro-passo quotidiano stampato in fondo alla pagina (Stoicismo/Bullet Journal).
-3. Rito di chiusura stoico-adattivo: "Cosa posso lasciare non risolto fino a domani?" + "Una cosa di cui sono soddisfatto".
+3. Rito di chiusura serale: "Che cosa posso lasciar andare stasera, per dormire tranquillo?" + "Una cosa di cui sono soddisfatto".
 4. Revisione non giudicante: rileggere dal calendario archivio, nessuna metrica di giudizio.
 
 ## Feature tecniche

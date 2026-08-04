@@ -59,8 +59,8 @@ describe('question library', () => {
     const a = getDailyStructure('2026-08-04')
     const b = getDailyStructure('2026-08-04')
     expect(a.map((s) => s.text)).toEqual(b.map((s) => s.text))
-    expect(a.some((s) => s.text.includes('lasciare non risolto'))).toBe(true)
-    expect(a.some((s) => s.text.includes('dipende da me'))).toBe(true)
+    expect(a.some((s) => s.text.includes('lasciar andare stasera'))).toBe(true)
+    expect(a.some((s) => s.text.includes('farò, e quando'))).toBe(true)
     expect(a[0].theme).toBe('Concretizzare') // martedì → Watkins
   })
 
@@ -79,6 +79,18 @@ describe('question library', () => {
     }
   })
 
+  it('is evening-friendly: no urgent-now or next-hours action prompts', () => {
+    const all = [
+      ...QUESTIONS.map((q) => q.text),
+      ...VISUAL_QUESTIONS.map((q) => q.text),
+      CLOSING_QUESTION, MICROSTEP_PROMPT,
+    ]
+    for (const text of all) {
+      expect(text).not.toMatch(/prossime due ore/i)
+      expect(text).not.toMatch(/fra un'ora|tra un'ora|subito adesso/i)
+    }
+  })
+
   it('counts questions per technique pool', () => {
     const counts = themeCounts()
     const total = Object.values(counts).reduce((sum, value) => sum + value, 0)
@@ -86,7 +98,8 @@ describe('question library', () => {
   })
 
   it('uses the user closing ritual and micro-step phrasing', () => {
-    expect(CLOSING_QUESTION).toContain('lasciare non risolto')
-    expect(MICROSTEP_PROMPT).toContain('dipende da me')
+    expect(CLOSING_QUESTION).toContain('lasciar andare stasera')
+    expect(CLOSING_QUESTION).toContain('dormire')
+    expect(MICROSTEP_PROMPT).toContain('farò, e quando')
   })
 })
