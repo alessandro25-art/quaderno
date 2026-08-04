@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { createJournalStore } from './data/store.js'
 import CoverView from './views/CoverView.jsx'
 import NotebookView from './views/NotebookView.jsx'
 import ArchiveView from './views/ArchiveView.jsx'
 import SettingsView from './views/SettingsView.jsx'
+import { registerSW } from 'virtual:pwa-register'
 
 export const VIEWS = { COVER: 'cover', NOTEBOOK: 'notebook', ARCHIVE: 'archive', SETTINGS: 'settings' }
 
@@ -17,6 +18,8 @@ export default function App({ store: providedStore } = {}) {
   const [installable, setInstallable] = useState(false)
   const [isStandalone, setIsStandalone] = useState(() => window.matchMedia?.('(display-mode: standalone)').matches ?? false)
   const [installPrompt, setInstallPrompt] = useState(null)
+  const [updateAvailable, setUpdateAvailable] = useState(false)
+  const updateSWRef = useRef(null)
 
   const refresh = useCallback(async () => {
     const all = await store.listNotebooks()
@@ -50,6 +53,21 @@ export default function App({ store: providedStore } = {}) {
     return () => window.removeEventListener('beforeinstallprompt', capture)
   }, [])
 
+  // Nuova versione disponibile: il service worker la segnala, l'utente aggiorna quando vuole.
+  useEffect(() => {
+    updateSWRef.current = registerSW({
+      onNeedRefresh() {
+        setUpdateAvailable(true)
+      },
+      onOfflineReady() {},
+    })
+    return () => { updateSWRef.current = null }
+  }, [])
+
+  function handleUpdate() {
+    updateSWRef.current?.(true)
+  }
+
   const current = notebooks.find((notebook) => notebook.id === currentId) ?? null
 
   async function handleInstall() {
@@ -66,6 +84,12 @@ export default function App({ store: providedStore } = {}) {
 
   return (
     <div className="app">
+      {updateAvailable && (
+        <div className="update-banner" role="status">
+          <span>È disponibile una nuova versione di Quaderno.</span>
+          <button type="button" onClick={handleUpdate}>Aggiorna ora</button>
+        </div>
+      )}
       {view === VIEWS.COVER && (
         <CoverView store={store} notebooks={notebooks} onOpen={(id) => { setCurrentId(id); setView(VIEWS.NOTEBOOK) }} onChanged={refresh} />
       )}

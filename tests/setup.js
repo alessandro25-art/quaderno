@@ -1,10 +1,15 @@
 import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
-import { afterEach } from 'vitest'
+import { afterEach, vi } from 'vitest'
 
 afterEach(() => {
   cleanup()
 })
+
+// Modulo virtuale di vite-plugin-pwa: non esiste in ambiente di test.
+vi.mock('virtual:pwa-register', () => ({
+  registerSW: () => () => {},
+}))
 
 // jsdom non implementa il contesto 2D: stub funzionante per i test.
 const ctxStub = new Proxy({}, {
