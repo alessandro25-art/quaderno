@@ -47,7 +47,7 @@ try {
   await card.click()
   await page.getByText('Domanda del giorno').waitFor()
   await page.getByText(/Cosa posso lasciare non risolto fino a domani/i).waitFor()
-  const question = await page.locator('.question-ticket p').innerText()
+  const question = await page.locator('.page-section').first().locator('.section-prompt').innerText()
   report.desktop.question = question
 
   // Disegna un tratto con la "pencil" via Pointer Events sintetici.

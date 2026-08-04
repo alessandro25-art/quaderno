@@ -7,7 +7,7 @@ import {
 } from 'lucide-react'
 import InkCanvas from '../components/InkCanvas.jsx'
 import { TOOLS, INK_COLORS, PEN_WIDTHS } from '../domain/ink.js'
-import { CLOSING_QUESTION, MICROSTEP_PROMPT, SATISFACTION_PROMPT, questionForDate } from '../data/questions.js'
+import { getDailyStructure } from '../data/questions.js'
 import { createRecognizer } from '../domain/recognizer.js'
 import { exportCanvasAsPdf } from '../domain/pdf.js'
 
@@ -17,19 +17,22 @@ const PEN_OPTIONS = [
   { id: 'thick', label: 'Grossa', width: PEN_WIDTHS.thick },
 ]
 
+const SECTION_HEIGHTS = { large: 320, medium: 220, small: 130 }
+
 export default function NotebookView({ store, notebook, initialDate = null, onBack, onOpenArchive, onOpenSettings }) {
   const [date, setDate] = useState(() => initialDate ?? format(new Date(), 'yyyy-MM-dd'))
   const [page, setPage] = useState(null)
-  const [strokes, setStrokes] = useState([])
+  const [strokesBySection, setStrokesBySection] = useState({})
   const [tool, setTool] = useState(TOOLS.PEN)
   const [penSize, setPenSize] = useState('medium')
   const [color, setColor] = useState(INK_COLORS.black)
   const [zoom, setZoom] = useState(1)
+  const [activeSection, setActiveSection] = useState('q1')
   const [notice, setNotice] = useState('')
   const [recognizing, setRecognizing] = useState(false)
-  const canvasRef = useRef(null)
+  const canvasRefs = useRef({})
 
-  const question = questionForDate(date)
+  const structure = getDailyStructure(date)
   const kindle = notebook.paperType === 'kindle'
 
   useEffect(() => {
@@ -39,7 +42,14 @@ export default function NotebookView({ store, notebook, initialDate = null, onBa
       if (!active) return
       setPage(todayPage)
       const stored = await store.listStrokes(todayPage.id)
-      if (active) setStrokes(stored)
+      if (!active) return
+      const grouped = {}
+      for (const stroke of stored) {
+        const key = stroke.section ?? 'free'
+        grouped[key] = grouped[key] || []
+        grouped[key].push(stroke)
+      }
+      setStrokesBySection(grouped)
     }
     load()
     return () => { active = false }
@@ -50,25 +60,26 @@ export default function NotebookView({ store, notebook, initialDate = null, onBa
       const modifier = event.ctrlKey || event.metaKey
       if (!modifier) return
       if (event.key.toLowerCase() === 'z' && event.shiftKey) {
-        event.preventDefault(); canvasRef.current?.redo()
+        event.preventDefault(); canvasRefs.current[activeSection]?.redo()
       } else if (event.key.toLowerCase() === 'z') {
-        event.preventDefault(); canvasRef.current?.undo()
+        event.preventDefault(); canvasRefs.current[activeSection]?.undo()
       } else if (event.key.toLowerCase() === 'y') {
-        event.preventDefault(); canvasRef.current?.redo()
+        event.preventDefault(); canvasRefs.current[activeSection]?.redo()
       }
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [])
+  }, [activeSection])
 
-  const persistStrokes = useCallback(async (next) => {
-    setStrokes(next)
+  const persistStrokes = useCallback(async (section, next) => {
+    setStrokesBySection((previous) => ({ ...previous, [section]: next }))
     if (!page) return
+    const all = Object.values({ ...strokesBySection, [section]: next }).flat()
     await store.db.transaction('rw', store.db.strokes, async () => {
       await store.db.strokes.where('pageId').equals(page.id).delete()
-      await store.saveStrokes(next)
+      await store.saveStrokes(all)
     })
-  }, [store, page])
+  }, [store, page, strokesBySection])
 
   async function setPageEnabled(enabled) {
     if (!page) return
@@ -79,7 +90,8 @@ export default function NotebookView({ store, notebook, initialDate = null, onBa
   }
 
   async function recognizePage() {
-    if (!page || !strokes.length) {
+    const allStrokes = Object.values(strokesBySection).flat()
+    if (!page || !allStrokes.length) {
       setNotice('Scrivi qualcosa prima di riconoscere la pagina.')
       return
     }
@@ -91,7 +103,7 @@ export default function NotebookView({ store, notebook, initialDate = null, onBa
     setRecognizing(true)
     try {
       const recognizer = createRecognizer(apiKey)
-      const text = await recognizer.recognize(strokes, 'it')
+      const text = await recognizer.recognize(allStrokes, 'it')
       const updated = { ...page, recognizedText: text }
       setPage(updated)
       await store.savePage(updated)
@@ -146,30 +158,30 @@ export default function NotebookView({ store, notebook, initialDate = null, onBa
             <span className="page-notebook">{notebook.title}</span>
           </div>
 
-          {question && (
-            <div className="question-ticket" role="note">
-              <span className="ticket-label">Domanda del giorno</span>
-              <p>{question.text}</p>
-            </div>
-          )}
-
-          <InkCanvas
-            key={page?.id ?? date}
-            ref={canvasRef}
-            strokes={strokes}
-            onStrokesChange={persistStrokes}
-            tool={tool}
-            color={color}
-            width={PEN_WIDTHS[penSize] ?? PEN_WIDTHS.medium}
-            zoom={zoom}
-            paperType={page?.paperType ?? notebook.paperType}
-          />
-
-          <div className="page-foot">
-            <div className="foot-line"><span className="foot-label">Micro-passo</span><span className="foot-text">{MICROSTEP_PROMPT}</span></div>
-            <div className="foot-line"><span className="foot-label">Chiusura</span><span className="foot-text">{CLOSING_QUESTION}</span></div>
-            <div className="foot-line"><span className="foot-label">Soddisfazione</span><span className="foot-text">{SATISFACTION_PROMPT}</span></div>
-          </div>
+          {structure.map((section, index) => (
+            <section className={`page-section ${section.size}`} key={section.id}>
+              <div className="section-head">
+                <span className="section-index">{String(index + 1).padStart(2, '0')}</span>
+                <span className="section-label">{section.label}</span>
+                <span className="section-theme">{section.theme}</span>
+              </div>
+              <p className="section-prompt">{section.text}</p>
+              <InkCanvas
+                ref={(element) => { canvasRefs.current[section.id] = element }}
+                strokes={strokesBySection[section.id] ?? []}
+                onStrokesChange={(next) => persistStrokes(section.id, next)}
+                tool={tool}
+                color={color}
+                width={PEN_WIDTHS[penSize] ?? PEN_WIDTHS.medium}
+                zoom={zoom}
+                paperType={page?.paperType ?? notebook.paperType}
+                pageId={page?.id}
+                section={section.id}
+                minHeight={SECTION_HEIGHTS[section.size] ?? 190}
+                onFocus={setActiveSection}
+              />
+            </section>
+          ))}
         </article>
         <aside className="spine right" aria-hidden="true" />
       </div>
@@ -227,8 +239,8 @@ export default function NotebookView({ store, notebook, initialDate = null, onBa
         </div>
 
         <div className="toolbar-group">
-          <button className="ghost-button" type="button" onClick={() => canvasRef.current?.undo()} aria-label="Annulla"><Undo2 size={18} /></button>
-          <button className="ghost-button" type="button" onClick={() => canvasRef.current?.redo()} aria-label="Rifai"><Redo2 size={18} /></button>
+          <button className="ghost-button" type="button" onClick={() => canvasRefs.current[activeSection]?.undo()} aria-label="Annulla"><Undo2 size={18} /></button>
+          <button className="ghost-button" type="button" onClick={() => canvasRefs.current[activeSection]?.redo()} aria-label="Rifai"><Redo2 size={18} /></button>
           <span className="toolbar-separator" aria-hidden="true" />
           <button className="ghost-button" type="button" onClick={() => setZoom((z) => Math.max(1, Math.round((z - 0.25) * 100) / 100))} aria-label="Riduci zoom"><ZoomOut size={18} /></button>
           <span className="zoom-value">{Math.round(zoom * 100)}%</span>

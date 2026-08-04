@@ -15,6 +15,10 @@ const InkCanvas = forwardRef(function InkCanvas({
   width = 3.6,
   zoom = 1,
   paperType = 'lined',
+  pageId = null,
+  section = 'free',
+  minHeight = 200,
+  onFocus,
   disabled = false,
 }, ref) {
   const containerRef = useRef(null)
@@ -107,8 +111,11 @@ const InkCanvas = forwardRef(function InkCanvas({
     } catch {
       // eventi sintetici o pointer già rilasciato: non blocca la scrittura
     }
+    onFocus?.(section)
     currentStrokeRef.current = {
       id: crypto.randomUUID(),
+      pageId,
+      section,
       tool,
       color,
       width,
@@ -196,6 +203,7 @@ const InkCanvas = forwardRef(function InkCanvas({
     <div
       ref={containerRef}
       className={`paper paper-${paperType}`}
+      style={{ minHeight }}
       onPointerDown={startStroke}
       onPointerMove={moveStroke}
       onPointerUp={endStroke}

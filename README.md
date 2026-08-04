@@ -6,7 +6,8 @@ Quaderno è una PWA local-first di journaling: la scrittura a mano resta sul dis
 
 ## Come funziona
 
-- **Una pagina al giorno**: data scritta in corsivo, domanda del giorno su un bigliettino, foglio a righe dove scrivi con la pencil, e in fondo il rituale stampato: micro-passo, "Cosa posso lasciare non risolto fino a domani?", "Una cosa di cui sono soddisfatto".
+- **Una pagina al giorno, strutturata**: ogni domanda ha il **suo spazio di scrittura**. La pagina ha 5 sezioni: domanda riflessiva (tecnica del giorno), domanda di visualizzazione, micro-passo, "Cosa posso lasciare non risolto fino a domani?", "Una cosa di cui sono soddisfatto".
+- **Domande basate su tecniche con evidenza**: rotazione settimanale — lunedì gratitudine (Emmons), martedì concretizzare (Watkins), mercoledì distanza (Kross), giovedì rileggere (Gross), venerdì savoring (Bryant), sabato osservare (Prochaska/DiClemente), domenica revisione gentile (Neff/King). Visualizzazione: BPS, lettera al sé futuro, esternalizzazione, sedia vuota, inner mentor, luogo sicuro e altre.
 - **Zero giudizio**: nessun punteggio, nessuna streak, nessun conteggio. Le domande sono suggerimenti; nei giorni difficili basta una riga.
 - **Quaderni multipli**: copertine, colori, pagine per data, archivio a calendario.
 - **Inchiostro**: pressione e inclinazione della Pencil, 3 larghezze, 4 colori, evidenziatore, gomma, undo/redo, zoom 1–3×.
@@ -55,6 +56,9 @@ src/
 ## Documentazione
 
 - `docs/GOAL.md` — obiettivo e principi;
+- `docs/GOAL-QUESTIONS.md` — obiettivo delle domande (tecniche, spazi, grammatica);
 - `/home/hermes/.hermes/journaling-books-research.md` — tecniche e libri (Cameron, Pennebaker, Emmons, stoicismo…);
+- `/home/hermes/.hermes/journaling-techniques-research.md` — 10 tecniche con evidenza + revisione grammaticale;
+- `/home/hermes/.hermes/journaling-visualization-research.md` — 23 tecniche di visualizzazione, 31 domande;
 - `/home/hermes/.hermes/journaling-competitive-research.md` — competitor e tecnologie handwriting;
 - `/home/hermes/.hermes/journaling-ux-architecture.md` — specifica UX e architettura.

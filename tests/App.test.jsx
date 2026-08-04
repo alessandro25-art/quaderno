@@ -30,7 +30,10 @@ describe('quaderno app', () => {
     })
     expect(screen.getByText(/Cosa posso lasciare non risolto fino a domani\?/i)).toBeInTheDocument()
     expect(screen.getByText(/Micro-passo di domani/i)).toBeInTheDocument()
-    expect(document.querySelector('.ink-layer')).not.toBeNull()
+    expect(screen.getAllByText(/Visualizzazione/i).length).toBeGreaterThanOrEqual(1)
+    // ogni domanda ha il suo spazio di scrittura dedicato (2 canvas per sezione)
+    expect(document.querySelectorAll('.page-section')).toHaveLength(5)
+    expect(document.querySelectorAll('.ink-layer')).toHaveLength(10)
   })
 
   it('creates a custom notebook from the cover', async () => {
