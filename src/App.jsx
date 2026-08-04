@@ -14,6 +14,7 @@ export default function App({ store: providedStore } = {}) {
   const [notebooks, setNotebooks] = useState([])
   const [currentId, setCurrentId] = useState(null)
   const [settingsFrom, setSettingsFrom] = useState('notebook')
+  const [reminder, setReminder] = useState('off')
   const [jumpDate, setJumpDate] = useState(null)
   const [loading, setLoading] = useState(true)
   const [installable, setInstallable] = useState(false)
@@ -60,6 +61,32 @@ export default function App({ store: providedStore } = {}) {
       navigator.storage.persist().catch(() => {})
     }
   }, [])
+
+  // Promemoria serale: notifica gentile quando l'app è aperta all'ora scelta.
+  useEffect(() => {
+    let active = true
+    store.getSetting('reminderTime', 'off').then((value) => {
+      if (active) setReminder(value)
+    })
+    return () => { active = false }
+  }, [store])
+
+  useEffect(() => {
+    if (reminder === 'off') return undefined
+    const interval = setInterval(async () => {
+      const now = new Date()
+      const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+      if (hhmm !== reminder) return
+      const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+      const last = await store.getSetting('lastReminderDate', '')
+      if (last === today) return
+      if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+        new Notification('Quaderno', { body: 'Hai un momento per scrivere? Anche una riga va bene.' })
+      }
+      await store.setSetting('lastReminderDate', today)
+    }, 30000)
+    return () => clearInterval(interval)
+  }, [store, reminder])
 
   // Nuova versione disponibile: il service worker la segnala, l'utente aggiorna quando vuole.
   useEffect(() => {

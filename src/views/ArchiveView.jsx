@@ -2,10 +2,23 @@ import { useEffect, useMemo, useState } from 'react'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, addDays, parseISO } from 'date-fns'
 import { it } from 'date-fns/locale'
 import { ArrowLeft, ChevronLeft, ChevronRight, Settings, ScrollText } from 'lucide-react'
+import { techniqueForDate } from '../data/questions.js'
+
+const TECHNIQUE_ORDER = ['gratitudine', 'concreto', 'distanza', 'rilettura', 'savoring', 'osservazione', 'revisione']
+const TECHNIQUE_LABELS = {
+  gratitudine: 'Gratitudine',
+  concreto: 'Concretizzare',
+  distanza: 'Distanza',
+  rilettura: 'Rileggere',
+  savoring: 'Savoring',
+  osservazione: 'Osservare',
+  revisione: 'Revisione',
+}
 
 export default function ArchiveView({ store, notebook, onBack, onOpenDay, onOpenSettings }) {
   const [month, setMonth] = useState(() => new Date())
   const [pages, setPages] = useState([])
+  const [techniqueFilter, setTechniqueFilter] = useState('all')
 
   useEffect(() => {
     let active = true
@@ -20,6 +33,12 @@ export default function ArchiveView({ store, notebook, onBack, onOpenDay, onOpen
     const end = endOfMonth(month)
     return eachDayOfInterval({ start, end })
   }, [month])
+
+  // Filtro per tecnica: la tecnica del giorno è deterministica dalla data.
+  const visibleDays = useMemo(() => {
+    if (techniqueFilter === 'all') return days
+    return days.filter((day) => techniqueForDate(format(day, 'yyyy-MM-dd')).key === techniqueFilter)
+  }, [days, techniqueFilter])
 
   const byDate = useMemo(() => {
     const map = {}
@@ -73,12 +92,33 @@ export default function ArchiveView({ store, notebook, onBack, onOpenDay, onOpen
           <button className="ghost-button" type="button" onClick={() => setMonth((m) => addMonths(m, 1))} aria-label="Mese successivo"><ChevronRight size={18} /></button>
         </div>
 
+        <div className="technique-chips" role="group" aria-label="Filtra per tecnica">
+          <button
+            type="button"
+            className={`tech-chip ${techniqueFilter === 'all' ? 'active' : ''}`}
+            onClick={() => setTechniqueFilter('all')}
+          >
+            Tutte
+          </button>
+          {TECHNIQUE_ORDER.map((key) => (
+            <button
+              key={key}
+              type="button"
+              className={`tech-chip ${techniqueFilter === key ? 'active' : ''}`}
+              aria-pressed={techniqueFilter === key}
+              onClick={() => setTechniqueFilter(key)}
+            >
+              {TECHNIQUE_LABELS[key]}
+            </button>
+          ))}
+        </div>
+
         <div className="calendar-weekdays">
           {weekdayLabels.map((label, index) => <span key={index}>{label}</span>)}
         </div>
 
         <div className="calendar-grid" style={{ '--offset': firstWeekday }}>
-          {days.map((day) => {
+          {visibleDays.map((day) => {
             const value = format(day, 'yyyy-MM-dd')
             const page = byDate[value]
             const isToday = value === today

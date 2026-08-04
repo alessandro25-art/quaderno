@@ -7,6 +7,7 @@ export default function SettingsView({ store, notebooks = [], onNotebooksChanged
   const [inkColor, setInkColor] = useState('black')
   const [notice, setNotice] = useState('')
   const [storageInfo, setStorageInfo] = useState(null)
+  const [reminderTime, setReminderTime] = useState('off')
   const fileRef = useRef(null)
 
   useEffect(() => {
@@ -15,11 +16,13 @@ export default function SettingsView({ store, notebooks = [], onNotebooksChanged
       store.getSetting('apiKey', ''),
       store.getSetting('paperType', 'kindle'),
       store.getSetting('inkColor', 'black'),
-    ]).then(([key, paper, ink]) => {
+      store.getSetting('reminderTime', 'off'),
+    ]).then(([key, paper, ink, reminder]) => {
       if (!active) return
       setApiKey(key)
       setPaperType(paper)
       setInkColor(ink)
+      setReminderTime(reminder)
     })
     return () => { active = false }
   }, [store])
@@ -111,6 +114,32 @@ export default function SettingsView({ store, notebooks = [], onNotebooksChanged
               <option value="red">Rosso</option>
             </select>
           </label>
+          <label>
+            Promemoria serale
+            <select value={reminderTime} onChange={(event) => { setReminderTime(event.target.value); savePreference('reminderTime', event.target.value) }}>
+              <option value="off">Spento</option>
+              <option value="20:00">20:00</option>
+              <option value="21:00">21:00</option>
+              <option value="22:00">22:00</option>
+            </select>
+          </label>
+          {reminderTime !== 'off' && typeof Notification !== 'undefined' && Notification.permission === 'default' && (
+            <button
+              className="ghost-button strong"
+              type="button"
+              onClick={async () => {
+                await Notification.requestPermission()
+                setNotice('Se concedi le notifiche, Quaderno ti chiama dolcemente all\'ora scelta.')
+              }}
+            >
+              Consenti notifiche
+            </button>
+          )}
+          {reminderTime !== 'off' && (
+            <p className="settings-help small">
+              Una notifica gentile all'ora scelta — funziona quando Quaderno è aperto (niente server).
+            </p>
+          )}
           {notebooks.length > 0 && (
             <div className="notebook-paper-list">
               <span className="settings-help">Foglio dei quaderni esistenti:</span>

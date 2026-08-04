@@ -654,6 +654,31 @@ input, select, textarea { font-family: inherit; color: inherit; }
 
 /* ── Archivio calendario ─────────────────────────────────────────────────── */
 
+.technique-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.tech-chip {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.tech-chip.active {
+  background: #2c2416;
+  border-color: #2c2416;
+  color: #f6efdc;
+  font-weight: 700;
+}
+
 .anniversary-banner {
   display: flex;
   align-items: center;
