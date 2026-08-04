@@ -373,6 +373,54 @@ input, select, textarea { font-family: inherit; color: inherit; }
 
 .page-section.small .section-theme { display: none; }
 
+/* Una domanda per pagina: avanzamento e navigazione */
+.section-progress {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 2px 0 18px;
+}
+
+.section-progress > span:first-child {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ink-faint);
+}
+
+.section-progress-label {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent-soft);
+  font-weight: 700;
+}
+
+.section-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.section-nav .primary-button {
+  min-height: 44px;
+  padding: 0 24px;
+}
+
+.section-nav .ghost-button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.paper-page.kindle .section-progress {
+  border-bottom: 1px solid #e2dbc8;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.paper-page.kindle .section-progress-label { color: #7d6f52; }
+
 .section-prompt {
   font-family: var(--serif);
   font-style: italic;
@@ -382,10 +430,11 @@ input, select, textarea { font-family: inherit; color: inherit; }
   line-height: 1.35;
 }
 
-/* Canvas carta: il dito scorre la pagina (pan-y), la penna scrive. */
+/* Canvas carta: touch-action none → la penna scrive sempre in modo affidabile
+   (il dito non disegna; lo scorrimento avviene dalle aree fuori dal foglio). */
 .paper {
   position: relative;
-  touch-action: pan-y;
+  touch-action: none;
   cursor: crosshair;
   border-top: 1px solid var(--paper-line);
   border-bottom: 1px solid var(--paper-line);
@@ -396,7 +445,7 @@ input, select, textarea { font-family: inherit; color: inherit; }
   inset: 0;
   width: 100%;
   height: 100%;
-  touch-action: pan-y;
+  touch-action: none;
 }
 
 .paper-lined {

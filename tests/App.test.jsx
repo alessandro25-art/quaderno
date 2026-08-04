@@ -21,19 +21,31 @@ describe('quaderno app', () => {
     expect(notebooks[0].paperType).toBe('kindle')
   })
 
-  it('opens the notebook and shows today question + paper + closing ritual', async () => {
+  it('opens the notebook and walks through one question per page', async () => {
     const store = makeStore()
     render(<App store={store} />)
     await userEvent.click(await screen.findByRole('button', { name: /diario/i }))
     await waitFor(() => {
-      expect(screen.getByText(/Domanda del giorno/i)).toBeInTheDocument()
+      expect(screen.getAllByText(/Domanda del giorno/i).length).toBeGreaterThanOrEqual(1)
     })
-    expect(screen.getByText(/Che cosa posso lasciar andare stasera/i)).toBeInTheDocument()
-    expect(screen.getByText(/Il mio micro-passo per domani/i)).toBeInTheDocument()
+    // una sola domanda per pagina, con il suo spazio di scrittura (2 canvas)
+    expect(document.querySelectorAll('.page-section')).toHaveLength(1)
+    expect(document.querySelectorAll('.ink-layer')).toHaveLength(2)
+    // la chiusura non è ancora visibile: si arriva avanzando
+    expect(screen.queryByText(/Che cosa posso lasciar andare stasera/i)).not.toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: /prossima/i }))
     expect(screen.getAllByText(/Visualizzazione/i).length).toBeGreaterThanOrEqual(1)
-    // ogni domanda ha il suo spazio di scrittura dedicato (2 canvas per sezione)
-    expect(document.querySelectorAll('.page-section')).toHaveLength(5)
-    expect(document.querySelectorAll('.ink-layer')).toHaveLength(10)
+
+    await userEvent.click(screen.getByRole('button', { name: /prossima/i }))
+    expect(screen.getByText(/Il mio micro-passo per domani/i)).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: /prossima/i }))
+    expect(screen.getByText(/Che cosa posso lasciar andare stasera/i)).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: /fine/i }))
+    expect(screen.getByText(/Buonanotte/i)).toBeInTheDocument()
+    expect(screen.getAllByText(/Domanda del giorno/i).length).toBeGreaterThanOrEqual(1)
   })
 
   it('creates a custom notebook from the cover', async () => {
@@ -51,7 +63,9 @@ describe('quaderno app', () => {
     const store = makeStore()
     render(<App store={store} />)
     await userEvent.click(await screen.findByRole('button', { name: /diario/i }))
-    await screen.findByText(/Domanda del giorno/i)
+    await waitFor(() => {
+      expect(screen.getAllByText(/Domanda del giorno/i).length).toBeGreaterThanOrEqual(1)
+    })
     await userEvent.click(screen.getByRole('button', { name: 'Giorno precedente' }))
     const pages = await store.listPages((await store.listNotebooks())[0].id)
     expect(pages.length).toBeGreaterThanOrEqual(2)

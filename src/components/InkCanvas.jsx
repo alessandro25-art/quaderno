@@ -170,7 +170,7 @@ const InkCanvas = forwardRef(function InkCanvas({
     if (stroke.pointerType === 'pen' && isTinyStroke(final)) {
       const now = Date.now()
       const previous = lastTinyTapRef.current
-      if (previous && now - previous.time <= 350) {
+      if (previous && now - previous.time <= 450) {
         lastTinyTapRef.current = null
         if (tool !== TOOLS.ERASER) {
           const remaining = strokesRef.current.filter(

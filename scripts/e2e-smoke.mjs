@@ -45,8 +45,7 @@ try {
   report.desktop.overflowX = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
 
   await card.click()
-  await page.getByText('Domanda del giorno').waitFor()
-  await page.getByText(/Che cosa posso lasciar andare stasera/i).waitFor()
+  await page.getByText('Domanda del giorno').first().waitFor()
   const question = await page.locator('.page-section').first().locator('.section-prompt').innerText()
   report.desktop.question = question
 
@@ -132,6 +131,17 @@ try {
     (element) => element.classList.contains('active'),
   )
 
+  // Flusso guidato: una domanda per pagina → avanza fino alla chiusura, poi Fine.
+  for (let i = 0; i < 3; i += 1) {
+    await page.getByRole('button', { name: /prossima/i }).click()
+  }
+  await page.getByText(/Che cosa posso lasciar andare stasera/i).waitFor()
+  report.desktop.flowReachesClosing = true
+  await page.getByRole('button', { name: /prossima/i }).click()
+  await page.locator('.section-nav .primary-button').click()
+  await page.getByText(/Buonanotte/i).waitFor()
+  report.desktop.flowFinishes = true
+
   // PWA manifest e icone.
   report.pwa = await page.evaluate(async () => {
     const manifest = await (await fetch('manifest.webmanifest')).json()
@@ -152,7 +162,7 @@ try {
   })
   await mobile.goto(baseURL, { waitUntil: 'networkidle' })
   await mobile.locator('.notebook-card').first().click()
-  await mobile.getByText('Domanda del giorno').waitFor()
+  await mobile.getByText('Domanda del giorno').first().waitFor()
   report.mobile.overflowX = await mobile.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
   report.mobile.canvasVisible = await mobile.locator('.ink-layer').first().isVisible()
   report.mobile.toolbarVisible = await mobile.locator('.page-toolbar').isVisible()
@@ -188,6 +198,8 @@ const failed =
   !report.desktop.doubleTapEraser ||
   !report.desktop.doubleTapClean ||
   !report.desktop.doubleTapPen ||
+  !report.desktop.flowReachesClosing ||
+  !report.desktop.flowFinishes ||
   !report.offline.reloadWorked ||
   report.pwa?.iconStatuses?.some((asset) => asset.status !== 200)
 

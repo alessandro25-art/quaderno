@@ -17,7 +17,7 @@ const PEN_OPTIONS = [
   { id: 'thick', label: 'Grossa', width: PEN_WIDTHS.thick },
 ]
 
-const SECTION_HEIGHTS = { large: 400, medium: 290, small: 175 }
+const FULL_SECTION_HEIGHT = 'calc(100dvh - 350px)'
 
 export default function NotebookView({ store, notebook, initialDate = null, onBack, onOpenArchive, onOpenSettings }) {
   const [date, setDate] = useState(() => initialDate ?? format(new Date(), 'yyyy-MM-dd'))
@@ -30,10 +30,39 @@ export default function NotebookView({ store, notebook, initialDate = null, onBa
   const [activeSection, setActiveSection] = useState('q1')
   const [notice, setNotice] = useState('')
   const [recognizing, setRecognizing] = useState(false)
+  const [sectionIndex, setSectionIndex] = useState(0)
   const canvasRefs = useRef({})
 
   const structure = getDailyStructure(date)
   const kindle = notebook.paperType === 'kindle'
+  const current = structure[sectionIndex] ?? structure[0]
+  const isFirst = sectionIndex === 0
+  const isLast = sectionIndex === structure.length - 1
+
+  // Ogni nuovo giorno riparte dalla prima domanda.
+  useEffect(() => {
+    setSectionIndex(0)
+  }, [date])
+
+  function goNext() {
+    if (isLast) return
+    const next = structure[sectionIndex + 1]
+    setSectionIndex((index) => index + 1)
+    setActiveSection(next.id)
+  }
+
+  function goPrev() {
+    if (isFirst) return
+    const prev = structure[sectionIndex - 1]
+    setSectionIndex((index) => index - 1)
+    setActiveSection(prev.id)
+  }
+
+  function finishDay() {
+    setSectionIndex(0)
+    setActiveSection(structure[0].id)
+    setNotice('Giornata scritta. Buonanotte 🌙')
+  }
 
   useEffect(() => {
     let active = true
@@ -157,37 +186,49 @@ export default function NotebookView({ store, notebook, initialDate = null, onBa
 
       <div className="page-shell">
         <aside className="spine" aria-hidden="true" />
-        <article className={`paper-page ${kindle ? 'kindle' : ''}`} key={page?.id ?? date} data-page={page?.id}>
+        <article className={`paper-page ${kindle ? 'kindle' : ''}`} key={`${date}-${current.id}`} data-page={page?.id}>
           <div className="page-head">
             <span className="page-date">{format(parseISO(date), 'EEEE d MMMM yyyy', { locale: it })}</span>
             <span className="page-notebook">{notebook.title}</span>
           </div>
 
-          {structure.map((section, index) => (
-            <section className={`page-section ${section.size}`} key={section.id}>
-              <div className="section-head">
-                <span className="section-index">{String(index + 1).padStart(2, '0')}</span>
-                <span className="section-label">{section.label}</span>
-                <span className="section-theme">{section.theme}</span>
-              </div>
-              <p className="section-prompt">{section.text}</p>
-              <InkCanvas
-                ref={(element) => { canvasRefs.current[section.id] = element }}
-                strokes={strokesBySection[section.id] ?? []}
-                onStrokesChange={(next) => persistStrokes(section.id, next)}
-                tool={tool}
-                color={color}
-                width={PEN_WIDTHS[penSize] ?? PEN_WIDTHS.medium}
-                zoom={zoom}
-                paperType={page?.paperType ?? notebook.paperType}
-                pageId={page?.id}
-                section={section.id}
-                minHeight={SECTION_HEIGHTS[section.size] ?? 190}
-                onFocus={setActiveSection}
-                onDoubleTap={handlePenDoubleTap}
-              />
-            </section>
-          ))}
+          <div className="section-progress" aria-label="Progresso della giornata">
+            <span>{sectionIndex + 1} / {structure.length}</span>
+            <span className="section-progress-label">{current.label}</span>
+          </div>
+
+          <section className={`page-section ${current.size} full`} key={current.id}>
+            <div className="section-head">
+              <span className="section-index">{String(sectionIndex + 1).padStart(2, '0')}</span>
+              <span className="section-label">{current.label}</span>
+              <span className="section-theme">{current.theme}</span>
+            </div>
+            <p className="section-prompt">{current.text}</p>
+            <InkCanvas
+              ref={(element) => { canvasRefs.current[current.id] = element }}
+              strokes={strokesBySection[current.id] ?? []}
+              onStrokesChange={(next) => persistStrokes(current.id, next)}
+              tool={tool}
+              color={color}
+              width={PEN_WIDTHS[penSize] ?? PEN_WIDTHS.medium}
+              zoom={zoom}
+              paperType={page?.paperType ?? notebook.paperType}
+              pageId={page?.id}
+              section={current.id}
+              minHeight={FULL_SECTION_HEIGHT}
+              onFocus={setActiveSection}
+              onDoubleTap={handlePenDoubleTap}
+            />
+          </section>
+
+          <nav className="section-nav" aria-label="Navigazione domande">
+            <button className="ghost-button" type="button" onClick={goPrev} disabled={isFirst}>← Precedente</button>
+            {isLast ? (
+              <button className="primary-button" type="button" onClick={finishDay}>✓ Fine</button>
+            ) : (
+              <button className="primary-button" type="button" onClick={goNext}>Prossima →</button>
+            )}
+          </nav>
         </article>
         <aside className="spine right" aria-hidden="true" />
       </div>
