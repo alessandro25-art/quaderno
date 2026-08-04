@@ -43,7 +43,9 @@ describe('quaderno app', () => {
     await userEvent.click(screen.getByRole('button', { name: /prossima/i }))
     expect(screen.getByText(/Che cosa posso lasciar andare stasera/i)).toBeInTheDocument()
 
-    await userEvent.click(screen.getByRole('button', { name: /fine/i }))
+    // ultima domanda → il pulsante diventa "✓ Fine"
+    await userEvent.click(screen.getByRole('button', { name: /prossima/i }))
+    await userEvent.click(screen.getByRole('button', { name: '✓ Fine' }))
     expect(screen.getByText(/Buonanotte/i)).toBeInTheDocument()
     expect(screen.getAllByText(/Domanda del giorno/i).length).toBeGreaterThanOrEqual(1)
   })
