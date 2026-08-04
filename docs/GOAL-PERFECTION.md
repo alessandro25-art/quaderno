@@ -38,5 +38,28 @@ essere perfetta."
 
 ## Log dei cicli
 
-### Ciclo 1 — avvio
-- Kickoff: ricerca (competitor, libri, piattaforma) + QA manuale automatico.
+### Ciclo 1 — ricerca + QA manuale automatico
+- Ricerca parallela completata: competitor (13 app), libri (20 autori), piattaforma iPad/PWA.
+- QA profondo `scripts/qa-deep.mjs`: 30 check, emulazione iPad, tutti i flussi. 30/30 verde, zero errori console.
+- Fix: etichette colori in italiano, Archivio→Impostazioni, back con memoria, foglio applicato alle pagine vuote, copertina centrata, card Privacy wide, select tematizzate, contrasti WCAG, `:active` feedback, undo/redo state, colori sempre visibili, `touch-action: none` (penna affidabile), screenshot fullPage rimosso (rompeva il canvas con dvh).
+
+### Ciclo 2 — critica esterna + feature
+- UX critique (10 problemi, 5 micro-interazioni, 4 incoerenze, 3 wow) e bug audit (24 bug) completati.
+- Implementate: capolettera fantasma, sfoglio animato, landscape ampio (media query + `--section-height`), toast fisso, colore del giorno, archivio su ultimo mese scritto, badge "2/5 ✍️", «In questo giorno» (subYears, bisestile ok), filtro archivio per tecnica, promemoria serale, micro-copy anti-perfezionismo (7 varianti), 14 domande nuove dai libri (49 totali).
+
+### Ciclo 3 — fix critici del bug audit (deployato e verificato live)
+- persistStrokes con coda serializzata (niente race, niente tratti persi)
+- Undo manager per sezione (sopravvive al cambio domanda) + copie safe
+- API key esclusa dai backup + conservata all'import (test dedicato)
+- API key in header `X-Goog-Api-Key`, mai nell'URL (test aggiornato)
+- Primo tap del doppio tap ritardato 450ms (niente puntini orfani nel DB)
+- Merge dei tratti scritti durante il caricamento + try/catch su createPage e salvataggi
+- Avviso mezzanotte, maxLength titolo, catch su storage.estimate
+- Verifica: 48 test verdi, lint pulito, QA 30/30, smoke 3/3 consecutivi, CI verde, smoke sul live OK.
+
+## Stato
+
+Cicli 1-3 completati e in produzione. Loop ancora aperto: prossimi candidati dal report
+(mini-calendario a tendina, classic mode, Year in Pages, OffscreenCanvas, pinch zoom,
+throttle 120Hz) — da schedulare quando l'utente lo chiede.
+
